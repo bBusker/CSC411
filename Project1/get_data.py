@@ -45,8 +45,8 @@ def get_data():
         for line in open("./faces_subset.txt"):
             if a in line:
                 filename = name + str(i) + '.' + line.split()[4].split('.')[-1]
-                retdata = timeout(urllib.request.urlretrieve, (line.split()[4], "./uncropped/" + filename), {}, 5)
-                if not os.path.isfile("./uncropped/" + filename):
+                retdata = timeout(urllib.request.urlretrieve, (line.split()[4], "./uncropped/" + filename), {}, 2)
+                if not os.path.isfile("./uncropped/" + filename) or retdata == False or retdata == None:
                     continue
                 try:
                     imarr = imread(retdata[0], True)
