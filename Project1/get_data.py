@@ -37,26 +37,28 @@ def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
     else:
         return it.result
 
-tempactors = ['Peri Gilpin']
+
 def get_data():
-    for a in tempactors: #TESTING
+    for a in actors:
         name = a.split()[1].lower()
         i = 0
         for line in open("./faces_subset.txt"):
             if a in line:
                 filename = name + str(i) + '.' + line.split()[4].split('.')[-1]
-                retdata = timeout(urllib.request.urlretrieve, (line.split()[4], "./uncropped/" + filename), {}, 2)
+                # if os.path.isfile("./uncropped/" + filename): #doesnt account for different extensions
+                #     i += 1
+                #     print(filename + " exists")
+                #     continue
+                retdata = timeout(urllib.request.urlretrieve, (line.split()[4], "./uncropped/" + filename), {}, 5)
                 if not os.path.isfile("./uncropped/" + filename) or retdata == False or retdata == None:
                     continue
                 try:
                     imarr = imread(retdata[0], True)
                     coords = line.split()[5]
-                    x1 = int(coords.split(',')[0])
-                    y1 = int(coords.split(',')[1])
-                    x2 = int(coords.split(',')[2])
-                    y2 = int(coords.split(',')[3])
+                    x1,y1,x2,y2 = list(map(int,(coords.split(','))))
                     imcropped = imarr[y1:y2, x1:x2]
-                    imsave("./cropped/" + filename, imcropped)
+                    imfinal = imresize(imcropped, (32,32))
+                    imsave("./cropped/" + filename, imfinal)
                     print(filename)
                     i += 1
 
@@ -64,3 +66,11 @@ def get_data():
                     print("invalid image")
                     os.remove(retdata[0])
 
+
+def image_count(path):
+    res = {key: 0 for key in actors}
+    for file in os.listdir(path):
+        for actor in actors:
+            if file.startswith(actor.split()[1].lower()):
+                res[actor] += 1
+    return res
