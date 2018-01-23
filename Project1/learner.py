@@ -27,6 +27,7 @@ def exp_loss(thetas, image_set, label0, label1):
             res += -log(1-sig) #TODO: divide by 0 bug
     return res/(2*i)
 
+
 def exp_loss_grad(y, z, x):
     sig = sigmoid(z)
     if(y == 1):
@@ -34,30 +35,32 @@ def exp_loss_grad(y, z, x):
     elif(y == 0):
         return (sig)*(x)
 
+
 #Guerzhoy's
 def quad_loss(x, y, theta):
     #x = vstack((ones((1, x.shape[1])), x))
     return sum((y.T - dot(theta.T, x)) ** 2)
 
 
-def quad_loss_grad(x, y, theta):
+def quad_loss_grad(x, y, theta, norm_const):
     #x = vstack((ones((1, x.shape[1])), x))
-    return -2 * sum((y.T - dot(theta.T, x)) * x, 1)
+    return -2 * sum((y.T - dot(theta.T, x)) * x, 1) / norm_const
 
 
 def grad_descent(f, df, x, y, init_t, alpha):
-    EPS = 1e-5   #EPS = 10**(-5)
+    EPS = 1e-5  #EPS = 10**(-5)
     prev_t = init_t-10*EPS
     t = init_t.copy()
-    max_iter = 500000
+    max_iter = 100000
     iter = 0
     while norm(t - prev_t) >  EPS and iter < max_iter:
         prev_t = t.copy()
-        t -= alpha*(df(x, y, t).reshape(1025,1))
-        if iter % 500 == 0:
+        grad = df(x, y, t, t.shape[0]).reshape(1025,1)
+        t -= alpha*(grad)
+        if iter % 1000 == 0:
             print("Iter", iter)
             print("x = (%.2f, %.2f, %.2f), f(x) = %.2f" % (t[0], t[1], t[2], f(x, y, t)))
-            print("Gradient: ", df(x, y, t), "\n")
+            #print("Gradient: ", grad, "\n")
         iter += 1
     return t
 
