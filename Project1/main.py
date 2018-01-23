@@ -1,6 +1,7 @@
 import get_data
 import learner
 import numpy as np
+from scipy.misc import *
 
 import os
 
@@ -8,26 +9,30 @@ actors = list(set([a.split("\n")[0] for a in open("./subset_actors.txt").readlin
 extensions = [".jpg", ".JPG", ".png", ".PNG", ".jpeg", ".JPEG"]
 
 #get_data.get_data()
-image_count = get_data.image_count("./uncropped")
+image_count = get_data.image_count("./cropped")
+training_sets, validation_sets, test_sets = get_data.generate_sets(actors)
 
-training_sets = {key: [] for key in actors}
-validation_sets = {key: [] for key in actors}
-test_sets = {key: [] for key in actors}
+#Part 3: Alec Baldwin vs Steve Carell
+thetas = np.zeros((1025,1))
+x_carell = np.zeros((image_count["Steve Carell"] - 20, 1025))
+x_baldwin = np.zeros((image_count["Alec Baldwin"] - 20, 1025))
+y = np.zeros((x_carell.shape[0] + x_baldwin.shape[0], 1))
 
-for actor in actors:
-    for i in range(image_count[actor] - 20):
-        for extension in extensions:
-            if(os.path.isfile("./uncropped/" + actor.split()[1].lower() + str(i) + extension)):
-                training_sets[actor].append((actor, actor.split()[1].lower() + str(i) + extension))
-    for i in range(image_count[actor] - 20, image_count[actor] - 10):
-        for extension in extensions:
-            if(os.path.isfile("./uncropped/" + actor.split()[1].lower() + str(i) + extension)):
-                validation_sets[actor].append((actor, actor.split()[1].lower() + str(i) + extension))
-    for i in range(image_count[actor] - 10, image_count[actor]):
-        for extension in extensions:
-            if(os.path.isfile("./uncropped/" + actor.split()[1].lower() + str(i) + extension)):
-                test_sets[actor].append((actor, actor.split()[1].lower() + str(i) + extension))
+j = 0
+for actor in ["Steve Carell", "Alec Baldwin"]:
+    i = 0
+    for image in training_sets[actor]:
+        imdata = (imread("./cropped/" + image[1])/255).reshape(1024)
+        imdata = np.concatenate(([1], imdata))
+        if actor == "Steve Carell":
+            x_carell[i] = imdata
+            y[j] = 1
+        elif actor == "Alec Baldwin":
+            x_baldwin[i] = imdata
+            y[j] = -1
+        i += 1
+        j += 1
 
-thetas = np.zeros((1,1024))
-thetas[0][123] = 123
-test = learner.exp_loss(thetas, test_sets["Alec Baldwin"] + test_sets["Steve Carell"], "Steve Carell", "Alec Baldwin")
+x = np.vstack((x_carell, x_baldwin))
+x = np.transpose(x)
+thetas = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.00001)

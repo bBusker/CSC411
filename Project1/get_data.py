@@ -1,17 +1,10 @@
 from pylab import *
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cbook as cbook
-import random
-import time
 from scipy.misc import *
-import matplotlib.image as mpimg
 import os
-from scipy.ndimage import filters
 import urllib.request
 
 actors = list(set([a.split("\n")[0] for a in open("./subset_actors.txt").readlines()]))
-
+extensions = [".jpg", ".JPG", ".png", ".PNG", ".jpeg", ".JPEG"]
 
 def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
     '''From:
@@ -74,3 +67,23 @@ def image_count(path):
             if file.startswith(actor.split()[1].lower()):
                 res[actor] += 1
     return res
+
+def generate_sets(actors):
+    image_counts = image_count("./cropped")
+    training_sets = {key: [] for key in actors}
+    validation_sets = {key: [] for key in actors}
+    test_sets = {key: [] for key in actors}
+    for actor in actors:
+        for i in range(image_counts[actor] - 20):
+            for extension in extensions:
+                if (os.path.isfile("./cropped/" + actor.split()[1].lower() + str(i) + extension)):
+                    training_sets[actor].append((actor, actor.split()[1].lower() + str(i) + extension))
+        for i in range(image_counts[actor] - 20, image_counts[actor] - 10):
+            for extension in extensions:
+                if (os.path.isfile("./cropped/" + actor.split()[1].lower() + str(i) + extension)):
+                    validation_sets[actor].append((actor, actor.split()[1].lower() + str(i) + extension))
+        for i in range(image_counts[actor] - 10, image_counts[actor]):
+            for extension in extensions:
+                if (os.path.isfile("./cropped/" + actor.split()[1].lower() + str(i) + extension)):
+                    test_sets[actor].append((actor, actor.split()[1].lower() + str(i) + extension))
+    return (training_sets, validation_sets, test_sets)
