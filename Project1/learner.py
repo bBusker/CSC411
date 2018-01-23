@@ -51,7 +51,7 @@ def grad_descent(f, df, x, y, init_t, alpha):
     EPS = 1e-5  #EPS = 10**(-5)
     prev_t = init_t-10*EPS
     t = init_t.copy()
-    max_iter = 100000
+    max_iter = 10000
     iter = 0
     while norm(t - prev_t) >  EPS and iter < max_iter:
         prev_t = t.copy()
@@ -63,6 +63,28 @@ def grad_descent(f, df, x, y, init_t, alpha):
             #print("Gradient: ", grad, "\n")
         iter += 1
     return t
+
+def test(test_sets, answers, thetas):
+    correct = 0
+    count = 0
+    for actor in test_sets:
+        i = 0
+        for image in test_sets[actor]:
+            imdata = (imread("./cropped/" + image[1]) / 255).reshape(1024)
+            imdata = np.concatenate(([1], imdata))
+            prediction = np.dot(imdata, thetas)[0]
+            print("%s %i|pred: %.2f, ans: %.2f" % (actor, i, prediction, answers[actor]))
+            min = 999
+            guess = 0
+            for answer in answers:
+                if abs(prediction - answers[answer]) < min:
+                    min = abs(prediction - answers[answer])
+                    guess = answer
+            if guess == image[0]:
+                correct += 1
+            i += 1
+            count += 1
+    return(correct / count)
 
 
 # def quad_loss(thetas, image_set, label0, label1):

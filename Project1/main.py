@@ -37,17 +37,9 @@ x = np.vstack((x_carell, x_baldwin))
 x = np.transpose(x)
 thetas = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.01)
 
-correct = 0
-for actor in ["Steve Carell", "Alec Baldwin"]:
-    i=0
-    for image in test_sets[actor]:
-        imdata = (imread("./cropped/" + image[1])/255).reshape(1024)
-        imdata = np.concatenate(([1], imdata))
-        print("%s %i: %f" % (actor, i, np.dot(imdata,thetas)[0]))
-        if np.dot(imdata,thetas)[0]>=0 and actor == "Steve Carell":
-            correct += 1
-        elif np.dot(imdata,thetas)[0]<0 and actor == "Alec Baldwin":
-            correct += 1
-        i+=1
-print(correct/20)
+
+testactors = {key:test_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
+testanswers = {"Alec Baldwin": -1, "Steve Carell": 1}
+res = learner.test(testactors, testanswers, thetas)
+print("Score: %.2f" % res)
 
