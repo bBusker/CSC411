@@ -1,6 +1,7 @@
 import get_data
 import learner
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.misc import *
 
 import os
@@ -42,4 +43,8 @@ testactors = {key:test_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
 testanswers = {"Alec Baldwin": -1, "Steve Carell": 1}
 res = learner.test(testactors, testanswers, thetas)
 print("Score: %.2f" % res)
+
+
+plt.imshow(thetas[1:].reshape((32,32)))
+plt.show()
 

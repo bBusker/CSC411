@@ -102,5 +102,8 @@ ENV/
 
 # project local
 *.jpg
-*.jpeg
 *.JPG
+*.png
+*.PNG
+*.jpeg
+*.JPEG
