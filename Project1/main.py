@@ -13,38 +13,35 @@ extensions = [".jpg", ".JPG", ".png", ".PNG", ".jpeg", ".JPEG"]
 image_count = get_data.image_count("./cropped")
 training_sets, validation_sets, test_sets = get_data.generate_sets(actors)
 
-#Part 3: Alec Baldwin vs Steve Carell
-thetas = np.zeros((1025,1))
-x_carell = np.zeros((image_count["Steve Carell"] - 20, 1025))
-x_baldwin = np.zeros((image_count["Alec Baldwin"] - 20, 1025))
-y = np.zeros((x_carell.shape[0] + x_baldwin.shape[0], 1))
+#Part 3: Steve Carell vs Alec Baldwin
+#Steve Carell: 1
+#Alec Baldwin: -1
+x,y,thetas = learner.generate_xyt(training_sets["Steve Carell"] + training_sets["Alec Baldwin"], [1 for i in range(len(training_sets["Steve Carell"]))] + [-1 for i in range(len(training_sets["Alec Baldwin"]))])
+thetas_p3 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.01, 100)
 
-j = 0
-for actor in ["Steve Carell", "Alec Baldwin"]:
-    i = 0
-    for image in training_sets[actor]:
-        imdata = (imread("./cropped/" + image[1])/255).reshape(1024)
-        imdata = np.concatenate(([1], imdata))
-        if actor == "Steve Carell":
-            x_carell[i] = imdata
-            y[j] = 1
-        elif actor == "Alec Baldwin":
-            x_baldwin[i] = imdata
-            y[j] = -1
-        i += 1
-        j += 1
+testactors_p3 = {key:test_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
+testanswers_p3 = {"Alec Baldwin": -1, "Steve Carell": 1}
+learner.test(testactors_p3, testanswers_p3, thetas_p3)
 
-x = np.vstack((x_carell, x_baldwin))
-x = np.transpose(x)
-thetas = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.01)
-
-
-testactors = {key:test_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
-testanswers = {"Alec Baldwin": -1, "Steve Carell": 1}
-res = learner.test(testactors, testanswers, thetas)
-print("Score: %.2f" % res)
-
-
-plt.imshow(thetas[1:].reshape((32,32)))
+#Part 4: Showing Thetas
+plt.imshow(thetas_p3[1:].reshape((32,32)))
 plt.show()
 
+#Part 5: Overfitting
+#Male: 1
+#Female: -1
+training_set_all = []
+labels_malefemale_all = []
+for actor in actors:
+    training_set_all += training_sets[actor]
+    if actor in ["Steve Carell", "Alec Baldwin", "Bill Hader"]:
+        labels_malefemale_all += [1 for i in range(len(training_sets[actor]))]
+    elif actor in ["Lorraine Bracco", "Peri Gilpin", "Angie Harmon"]:
+        labels_malefemale_all += [-1 for i in range(len(training_sets[actor]))]
+
+x,y,thetas = learner.generate_xyt(training_set_all, labels_malefemale_all)
+thetas_p4 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.002, 10000)
+
+testactors_p4 = {key:test_sets[key] for key in actors}
+testanswers_p4 = {"Steve Carell": 1, "Alec Baldwin": 1, "Bill Hader": 1, "Lorraine Bracco": -1, "Peri Gilpin": -1, "Angie Harmon": -1}
+learner.test(testactors_p4, testanswers_p4, thetas_p4)
