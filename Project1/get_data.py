@@ -31,6 +31,7 @@ def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
         return it.result
 
 
+# Gets actor image data from database website using list of actors in subset_actors
 def get_data():
     for a in actors:
         name = a.split()[1].lower()
@@ -60,6 +61,7 @@ def get_data():
                     os.remove(retdata[0])
 
 
+# Returns a dictionary that lists how many images of each actor are present in a directory
 def image_count(path):
     res = {key: 0 for key in actors}
     for file in os.listdir(path):
@@ -68,6 +70,8 @@ def image_count(path):
                 res[actor] += 1
     return res
 
+
+# Generates and returns training, validation, and test sets for each actor
 def generate_sets(actors):
     image_counts = image_count("./cropped")
     training_sets = {key: [] for key in actors}

@@ -10,17 +10,21 @@ import os
 from scipy.ndimage import filters
 import urllib.request
 
-#Modified Guerzhoy's
+
+# Quadratic loss function
 def quad_loss(x, y, theta):
     #x = vstack((ones((1, x.shape[1])), x))
     return sum((y.T - dot(theta.T, x)) ** 2)
 
 
+# Gradient of quadratic loss function
 def quad_loss_grad(x, y, theta, norm_const):
     #x = vstack((ones((1, x.shape[1])), x))
     return -2 * sum((y.T - dot(theta.T, x)) * x, 1) / norm_const
 
 
+# Generates corresponding x's, y's and thetas for gradient descent function
+# Takes sorted input of training images and their corresponding training label
 def generate_xyt(input_sets, labels):
     x = np.zeros((len(input_sets), 1025))
     y = np.zeros((len(input_sets),1))
@@ -33,6 +37,7 @@ def generate_xyt(input_sets, labels):
     return x.T, y, thetas
 
 
+# Gradient descent function. Taken from CSC411 website.
 def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
     EPS = 1e-5  #EPS = 10**(-5)
     prev_t = init_t-10*EPS
@@ -52,6 +57,9 @@ def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
     return t
 
 
+# Test a set of thetas for their accuracy on the test set
+# Takes in a dictionary of test sets per actor, a dictionary of the corresponding correct answer for each actor,
+# and the computed thetas
 def test(test_sets, answers, thetas):
     correct = 0
     count = 0
@@ -76,3 +84,4 @@ def test(test_sets, answers, thetas):
             i += 1
             count += 1
     print("Score: %.2f" % (correct / count))
+    return (correct/count)
