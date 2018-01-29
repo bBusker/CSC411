@@ -15,7 +15,7 @@ extensions = [".jpg", ".JPG", ".png", ".PNG", ".jpeg", ".JPEG"]
 # get_data.get_data()
 image_count = get_data.image_count("./cropped")
 training_sets, validation_sets, test_sets = get_data.generate_sets(actors)
-
+np.set_printoptions(precision=2)
 
 # Part 3: Steve Carell vs Alec Baldwin
 # Steve Carell: 1
