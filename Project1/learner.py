@@ -43,6 +43,7 @@ def generate_xyt(input_sets, labels):
 
 # Gradient descent function. Taken from CSC411 website.
 def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
+    print("------------------------- Starting Grad Descent -------------------------")
     EPS = 1e-5  #EPS = 10**(-5)
     prev_t = init_t-10*EPS
     t = init_t.copy()
@@ -56,8 +57,6 @@ def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
             print("Iter %i: cost = %.2f" % (iter, f(x, y, t)))
             #print("Gradient: ", grad, "\n")
         iter += 1
-    print("------------------------- Finished Grad Descent -------------------------")
-    print("")
     return t
 
 
