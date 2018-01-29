@@ -1,0 +1,21 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\author{Shichen Lu}
+\title{CSC411 Project 1}
+\begin{document}
+\maketitle
+\section*{Part 1}
+\section*{Part 6}
+\subsection*{Subsection A}
+We have 
+\begin{equation}
+J(\theta)=\sum_i(\sum_j(\theta^T x^{(i)} - y^{(i)})^2_j)
+\end{equation}
+We can use the chain rule compute the partial derivative with respect to $\theta_{pq}$ (ie. to each individual theta element in the vector) as
+\begin{equation}
+\frac{\partial J}{\partial \theta_{pq}} = 2 \sum_i(\sum_j((\theta^T x^{(i)} - y^{(i)})*\frac{\partial \theta^T x^{(i)}}{\partial \theta_{pq}}))_j
+\end{equation} 
+\end{document}}
