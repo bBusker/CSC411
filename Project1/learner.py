@@ -20,17 +20,7 @@ def quad_loss(x, y, theta):
 # Gradient of quadratic loss function
 def quad_loss_grad(x, y, theta, norm_const):
     #x = vstack((ones((1, x.shape[1])), x))
-    temp0 = dot(theta.T, x)
-    temp1 = y.T - temp0
-    temp2 = -2 * dot(x,temp1.T)/ norm_const
-#    temp1 = -2 * dot(x,(y.T - dot(theta.T, x)).T)/ norm_const
-    return temp2
-#    return -2 * sum((y.T - dot(theta.T, x)) * x, 1) / norm_const
-
-
-# Quadratic loss function for multiple actor classification
-def quad_loss_vec(x, y, theta):
-    return 0
+    return -2 * dot(x, (y.T - dot(theta.T,x)).T)/ norm_const
 
 
 # Generates corresponding x's, y's and thetas for gradient descent function
