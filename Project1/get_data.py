@@ -6,6 +6,7 @@ import urllib.request
 actors = list(set([a.split("\n")[0] for a in open("./subset_actors.txt").readlines()]))
 extensions = [".jpg", ".JPG", ".png", ".PNG", ".jpeg", ".JPEG"]
 
+
 def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
     '''From:
     http://code.activestate.com/recipes/473878-timeout-function-using-threading/'''
@@ -49,9 +50,9 @@ def get_data():
                 try:
                     imarr = imread(retdata[0], True)
                     coords = line.split()[5]
-                    x1,y1,x2,y2 = list(map(int,(coords.split(','))))
+                    x1, y1, x2, y2 = list(map(int, (coords.split(','))))
                     imcropped = imarr[y1:y2, x1:x2]
-                    imfinal = imresize(imcropped, (32,32))
+                    imfinal = imresize(imcropped, (32, 32))
                     imsave("./cropped/" + filename, imfinal)
                     print(filename)
                     i += 1

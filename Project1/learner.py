@@ -1,26 +1,17 @@
 from pylab import *
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.cbook as cbook
-import random
-import time
 from scipy.misc import *
-import matplotlib.image as mpimg
-import os
-from scipy.ndimage import filters
-import urllib.request
 
 
 # Quadratic loss function
-def quad_loss(x, y, theta):
-    #x = vstack((ones((1, x.shape[1])), x))
-    return sum((y.T - dot(theta.T, x)) ** 2)
+def quad_loss(x, y, theta, norm_const):
+    # x = vstack((ones((1, x.shape[1])), x))
+    return sum((y.T - dot(theta.T, x)) ** 2) / norm_const
 
 
 # Gradient of quadratic loss function
 def quad_loss_grad(x, y, theta, norm_const):
-    #x = vstack((ones((1, x.shape[1])), x))
-    return -2 * dot(x, (y.T - dot(theta.T,x)).T)/ norm_const
+    # x = vstack((ones((1, x.shape[1])), x))
+    return -2 * dot(x, (y.T - dot(theta.T, x)).T) / norm_const
 
 
 # Generates corresponding x's, y's and thetas for gradient descent function
@@ -28,7 +19,7 @@ def quad_loss_grad(x, y, theta, norm_const):
 def generate_xyt(input_sets, labels):
     x = np.zeros((len(input_sets), 1025))
     try:
-        y = np.zeros((len(input_sets),len(labels[0])))
+        y = np.zeros((len(input_sets), len(labels[0])))
         thetas = zeros((1025, len(labels[0])))
     except:
         y = np.zeros((len(input_sets), 1))
@@ -44,18 +35,18 @@ def generate_xyt(input_sets, labels):
 # Gradient descent function. Taken from CSC411 website.
 def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
     print("------------------------- Starting Grad Descent -------------------------")
-    EPS = 1e-5  #EPS = 10**(-5)
-    prev_t = init_t-10*EPS
+    EPS = 1e-5  # EPS = 10**(-5)
+    prev_t = init_t - 10 * EPS
     t = init_t.copy()
     max_iter = _max_iter
     iter = 0
     while norm(t - prev_t) > EPS and iter < max_iter:
         prev_t = t.copy()
         grad = df(x, y, t, x.shape[1])
-        t -= alpha*(grad)
+        t -= alpha * grad
         if iter % 1000 == 0:
-            print("Iter %i: cost = %.2f" % (iter, f(x, y, t)))
-            #print("Gradient: ", grad, "\n")
+            print("Iter %i: cost = %.2f" % (iter, f(x, y, t, x.shape[1])))
+            # print("Gradient: ", grad, "\n")
         iter += 1
     return t
 
@@ -66,9 +57,11 @@ def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
 def test(test_sets, answers, thetas):
     correct = 0
     count = 0
+    conc_sets = []
     print("------------------------- Testing -------------------------")
     for actor in test_sets:
         i = 0
+        conc_sets += test_sets[actor]
         for image in test_sets[actor]:
             imdata = (imread("./cropped/" + image[1]) / 255).reshape(1024)
             imdata = np.concatenate(([1], imdata))
@@ -90,5 +83,10 @@ def test(test_sets, answers, thetas):
                 print("incorrect!")
             i += 1
             count += 1
+    conc_sets_labels = [0 for i in range(len(conc_sets))]
+    for i in range(len(conc_sets)):
+        conc_sets_labels[i] = answers[conc_sets[i][0]]
+    x, y, t = generate_xyt(conc_sets, conc_sets_labels)
+    print("Cost: %.2f" % quad_loss(x, y, thetas, x.shape[1]))
     print("Score: %.2f" % (correct / count))
-    return (correct/count)
+    return (correct / count)
