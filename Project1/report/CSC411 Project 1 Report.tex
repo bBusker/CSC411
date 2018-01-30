@@ -21,7 +21,7 @@
 \begin{document}
 \maketitle
 \section*{Introduction}
-The python code associated with this report is included in three separate files: main.py, learner.py, and get\_data.py. It is written in Python 3.6.4 and references image files that are included in the folder "uncropped". This folder should be placed in the directory that the program is run from.
+The python code associated with this report is included in three separate files: faces.py, learner.py, and get\_data.py. It is written in Python 3.6.4 and references image files that are included in the folder "uncropped". This folder should be placed in the directory that the program is run from.
 
 \section*{Part 1}
 The images were taken from the online "FaceScrub" database, which can be found at http://vintage.winklerbros.net/facescrub.html. It contains images of various 	people as well as information for where on the image the person's face is located. For this project, we have taken a set of images from certain actors from the website to use in an image classification project. To evaluate the quality of the images collected, some images from the dataset are produced below:\\\\
@@ -77,16 +77,15 @@ Based on the data given by the database, the images are automatically cropped, r
 \label{fig:test}
 \end{figure}	
 
-As we can see, there is varying data in the quality of the images. While most images are head-on images of the actor which produce good quality faces when cropped, such as the Daniel Radcliffe example given above, there are a small amount of images in the database where the actors are shot from the side, or are not directly facing the camera, as seen in the Alec Baldwin example. Additionally, there are also a small amount of pictures in which the provided information to crop out the actor's face is completely wrong, as seen in the Lorraine Bracco example. However, the amount of images that fall into the third category is very small (estimated $<$ 1\%). Overall, the quality of cropped images are fairly good.
+As we can see, there is varying data in the quality of the images. While most images are head-on images of the actor which produce good quality faces when cropped, such as in the Daniel Radcliffe example given above, there are a small amount of images in the database where the actors are shot from the side, or are not directly facing the camera, as seen in the Alec Baldwin example. Additionally, there are also a small amount of pictures in which the provided information to crop out the actor's face is completely wrong, as seen in the Lorraine Bracco example. However, the amount of images that fall into the third category is very small (estimated $<$ 1\%) and doesnt seem to affect the end quality of the results obtained. Overall, the quality of cropped images are fairly good.
 
 \section*{Part 2}
 Initially, we will analyise six total actors: Lorraine Bracco Peri Gilpin Angie Harmon Alec Baldwin Bill Hader Steve Carell. \\\\
-The following algorithm was used to separate the cropped face images of each actor: 
+The following function was used to separate the cropped face images of each actor: 
 
 \begin{lstlisting}
 # Generates and returns training, validation, and test sets for each actor
 def generate_sets(actors):
-    extensions = [".jpg", ".JPG", ".png", ".PNG", ".jpeg", ".JPEG"]
     image_counts = image_count("./cropped")
     training_sets = {key: [] for key in actors}
     validation_sets = {key: [] for key in actors}
@@ -120,23 +119,33 @@ def image_count(path):
     return res
 \end{lstlisting}
 
-Overall, for each actor, the function simply puts the last ten collected images into the test set, the 20th to 11th last collected images into the validation set, and the rest of the images into the training set. Note that although the images are split the same way for each time the program is run, due to how the datacollection parses the database images, the images are not collected in the same order each time the program is run. So the generated sets are not necessarily the same for each time the program is run.
+Overall, for each actor, the function simply puts the last ten collected images into the test set, the 20th to 11th last collected images into the validation set, and the rest of the images into the training set. Note that although the images are split the same way for each time the program is run, due to how the data collection algorithm parses the database images, the images are often not collected in the same order each time the program is run. So the generated sets are not necessarily the same for each time the program is run.
 
 \section*{Part 3}
 The following code was called to generate a classifier through Linear Regression for distinguishing between pictures of Alec Baldin and pictures of Steve Carell:
 
 \begin{lstlisting}
-# Part 3: Steve Carell vs Alec Baldwin
+# Part 3: Steve Carell vs Alec Baldwin =======================
+# Labels:
 # Steve Carell: 1
 # Alec Baldwin: -1
 print("\n\n >>>PART 3<<<")
 
-x,y,thetas = learner.generate_xyt(training_sets["Steve Carell"] + training_sets["Alec Baldwin"], [1 for i in range(len(training_sets["Steve Carell"]))] + [-1 for i in range(len(training_sets["Alec Baldwin"]))])
+# Generating Sets and Running Gradient Descent
+x, y, thetas = learner.generate_xyt(training_sets["Steve Carell"] + training_sets["Alec Baldwin"], [1 for i in range(len(training_sets["Steve Carell"]))] + [-1 for i in range(len(training_sets["Alec Baldwin"]))])
 thetas_p3 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.001, 10000)
 
-testactors_p3 = {key:test_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
-testanswers_p3 = {"Alec Baldwin": np.array((-1)), "Steve Carell": np.array((1))}
-learner.test(testactors_p3, testanswers_p3, thetas_p3)
+# Generating Inputs for Testing
+training_sets_p3 = {key: training_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
+validation_sets_p3 = {key: validation_sets[key] for key in ["Alec Baldwin", "Steve Carell"]}
+answers_p3 = {"Alec Baldwin": np.array((-1)), "Steve Carell": np.array((1))}
+
+# Testing Results
+print("\nTraining Set")
+learner.test(training_sets_p3, answers_p3, thetas_p3, False)
+print("\nValidation Set")
+learner.test(validation_sets_p3, answers_p3, thetas_p3)
+
 \end{lstlisting}
 
 This code uses three worker functions: 
@@ -148,7 +157,7 @@ This code uses three worker functions:
 def generate_xyt(input_sets, labels):
     x = np.zeros((len(input_sets), 1025))
     try:
-        y = np.zeros((len(input_sets),len(labels[0])))
+        y = np.zeros((len(input_sets), len(labels[0])))
         thetas = zeros((1025, len(labels[0])))
     except:
         y = np.zeros((len(input_sets), 1))
@@ -162,22 +171,24 @@ def generate_xyt(input_sets, labels):
 \end{lstlisting}
 \item learner.gradient\_descent which implements gradient descent using a quadratic cost funtion to minimize the thetas (this was modified slightly from the version on the CSC411 course website)
 \begin{lstlisting}
-# Gradient descent function. Taken from CSC411 website.
-def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
+# Gradient descent function. Taken from CSC411 website and slightly modified.
+def grad_descent(f, df, x, y, init_t, alpha, _max_iter, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
-    EPS = 1e-5  #EPS = 10**(-5)
-    prev_t = init_t-10*EPS
+    EPS = 1e-5  # EPS = 10**(-5)
+    prev_t = init_t - 10 * EPS
     t = init_t.copy()
     max_iter = _max_iter
     iter = 0
-    while norm(t - prev_t) > EPS and iter < max_iter:
+    while iter < max_iter: #and norm(t - prev_t) > EPS:
         prev_t = t.copy()
         grad = df(x, y, t, x.shape[1])
-        t -= alpha*(grad)
-        if iter % 1000 == 0:
-            print("Iter %i: cost = %.2f" % (iter, f(x, y, t)))
-            #print("Gradient: ", grad, "\n")
+        t -= alpha * grad
+        if iter % 5000 == 0 and printing:
+            print("Iter %i: cost = %.2f" % (iter, f(x, y, t, x.shape[1])))
+        elif iter % 50000 == 0:
+            print("Training...")
         iter += 1
+    print("Done!")
     return t
 \end{lstlisting}
 \item learner.test, which tests our linear regression results on the testing sets and reports the results
@@ -185,7 +196,7 @@ def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
 # Test a set of thetas for their accuracy on the test set
 # Takes in a dictionary of test sets per actor, a dictionary of the corresponding correct answer for each actor,
 # and the computed thetas
-def test(test_sets, answers, thetas):
+def test(test_sets, answers, thetas, printing=True):
     correct = 0
     count = 0
     conc_sets = []
@@ -197,10 +208,11 @@ def test(test_sets, answers, thetas):
             imdata = (imread("./cropped/" + image[1]) / 255).reshape(1024)
             imdata = np.concatenate(([1], imdata))
             prediction = np.dot(imdata, thetas)
-            print("%s %i|pred:" % (actor, i), end=" ")
-            print(prediction, end=" ")
-            print("ans:", end=" ")
-            print(answers[actor], end=" ")
+            if(printing):
+                print("%s %i|pred:" % (actor, i), end=" ")
+                print(prediction, end=" ")
+                print("ans:", end=" ")
+                print(answers[actor], end=" ")
             min = sum(abs(prediction - answers[actor]))
             guess = actor
             for answer in answers:
@@ -209,9 +221,9 @@ def test(test_sets, answers, thetas):
                     guess = answer
             if guess == image[0]:
                 correct += 1
-                print("correct!")
+                if printing: print("correct!")
             else:
-                print("incorrect!")
+                if printing: print("incorrect!")
             i += 1
             count += 1
     conc_sets_labels = [0 for i in range(len(conc_sets))]
@@ -224,7 +236,7 @@ def test(test_sets, answers, thetas):
 \end{lstlisting}
 \end{enumerate}
 
-The values used for the alpha and number of iterations in gradient descent were 0.001 and 10000 respectively. It was noted that any alpha greater than 0.008 would cause an overflow error during the first iteration of the gradient descente process and crash the program. Additionally, it was found that running around 10000 iterations of the gradient descent process produced the best results, and using a greater number of iterations actually decreased the accuracy of the algorithm.\\
+The values used for the alpha and number of iterations in gradient descent were 0.001 and 10000 respectively. It was noted that any alpha greater than 0.008 would cause an overflow error during the first iteration of the gradient descente process and crash the program. Additionally, it was found that running around 10000 iterations of the gradient descent process produced the best results, and using a significantly greater number of iterations (eg. 100000 iterations) actually decreased the accuracy of the algorithm.\\
 
 In the end, the algorithm was able to hit a 90\% accuracy with a 0.33 cost on the testing sets, and 95\% accuracy with a 0.24 cost on the validation sets.
 
@@ -275,11 +287,13 @@ By using a relatively low amount of iterations (around 10) of gradient descent, 
 
 On the other hand, by using a high amount of iterations (around 100000) in the gradient descent, we were able to obtain a set of thetas that looked a bit more random, as seen in Figure 4(b).
 
+\newpage
 \section*{Part 5}
 Using the following code, male-female classifiers were built and tested using images of the 6 actors mentioned in Part 2
 
 \begin{lstlisting}
-# Part 5: Overfitting
+# Part 5: Overfitting ===========================
+# Labels:
 # Male: 1
 # Female: -1
 print("\n\n >>>PART 5<<<")
@@ -287,10 +301,15 @@ print("\n\n >>>PART 5<<<")
 testanswers_p5 = {"Steve Carell": np.array((1)), "Alec Baldwin": np.array((1)), "Bill Hader": np.array((1)),
                    "Lorraine Bracco": np.array((-1)), "Peri Gilpin": np.array((-1)), "Angie Harmon": np.array((-1))}
 
+# Arrays to Store Results
 test_results_training = np.zeros((22,1))
 test_results_validation = np.zeros((22,1))
+
+# Loop from Using 5 Images to Using 115 Images
 for i in range (22):
     print("\nUsing %i Training Images" % ((i+1)*5))
+
+    # Generating Appropriately Sized Training Sets
     training_set_orig_6 = []
     labels_malefemale = []
 
@@ -301,14 +320,20 @@ for i in range (22):
         elif actor in ["Lorraine Bracco", "Peri Gilpin", "Angie Harmon"]:
             labels_malefemale += [-1 for i in range(len(training_sets[actor][:(i+1)*5]))]
 
+    # Generating Sets for Gradient Descent
     x, y, thetas = learner.generate_xyt(training_set_orig_6, labels_malefemale)
-    thetas_p5 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.001, 100000)
+    thetas_p5 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.001, 100000, False)
 
-    training_sets_p5 = {key: training_sets[key][:(i+1)*5] for key in actors_orig}
-    validation_sets_p5 = {key:validation_sets[key] for key in actors_orig}
-    test_results_training[i] = learner.test(training_sets_p5, testanswers_p5, thetas_p5, False)
-    test_results_validation[i] = learner.test(validation_sets_p5, testanswers_p5, thetas_p5, False)
+    # Testing and Recording Results
+    training_set_p5 = {key: training_sets[key][:(i + 1) * 5] for key in actors_orig}
+    validation_set_p5 = {key:validation_sets[key] for key in actors_orig}
 
+    print("\nTraining Set")
+    test_results_training[i] = learner.test(training_set_p5, testanswers_p5, thetas_p5, False)
+    print("\nValidation Set")
+    test_results_validation[i] = learner.test(validation_set_p5, testanswers_p5, thetas_p5, False)
+
+# Plotting Results
 plt.plot(range(5,115,5), test_results_validation*100, label="Validation")
 plt.plot(range(5,115,5), test_results_training*100, label="Training")
 plt.ylabel("% Correct")
@@ -318,6 +343,8 @@ plt.legend()
 plt.title("Part 5 Test Results for Varying Number of Training Images")
 plt.show()
 
+# Testing Classifier on 6 New Actors
+print("\nTesting Part 5 Classifier on New Actors")
 testactors_p5b = {key: test_sets[key] for key in actors_new}
 testanswers_p5b = {"Michael Vartan": np.array((1)), "Gerard Butler": np.array((1)), "Daniel Radcliffe": np.array((1)),
                    "Kristin Chenoweth": np.array((-1)), "America Ferrera": np.array((-1)),
@@ -408,7 +435,7 @@ Which easily becomes
 \frac{\partial J}{\partial \theta} = 2X(\theta^TX-Y)^T
 \end{equation}
 
-As desired
+As desired.
 \subsection*{Subsection C}
 The code for the vectorized gradient function is reproduced below
 \begin{lstlisting}
@@ -461,7 +488,8 @@ Grad Difference for theta[836][4]: 0.000011
 \section*{Part 7}
 The following code was used to run gradient descent to classify between the 6 original actors:
 \begin{lstlisting}
-# Part 7: Multiple Actor Classification
+# Part 7: Multiple Actor Classification ===============
+# Labels:
 # Alec Baldwin:    [1,0,0,0,0,0]
 # Steve Carell:    [0,1,0,0,0,0]
 # Bill Hader:      [0,0,1,0,0,0]
@@ -470,36 +498,7 @@ The following code was used to run gradient descent to classify between the 6 or
 # Peri Gilpin:     [0,0,0,0,0,1]
 print("\n\n >>>PART 7<<<")
 
-training_set_orig_6 = []
-labels_by_actor = []
-
-for actor in actors_orig:
-    training_set_orig_6 += training_sets[actor]
-    if actor == "Alec Baldwin":
-        labels_by_actor += [[1, 0, 0, 0, 0, 0] for i in range(len(training_sets[actor]))]
-    elif actor == "Steve Carell":
-        labels_by_actor += [[0, 1, 0, 0, 0, 0] for i in range(len(training_sets[actor]))]
-    elif actor == "Bill Hader":
-        labels_by_actor += [[0, 0, 1, 0, 0, 0] for i in range(len(training_sets[actor]))]
-    elif actor == "Lorraine Bracco":
-        labels_by_actor += [[0, 0, 0, 1, 0, 0] for i in range(len(training_sets[actor]))]
-    elif actor == "Angie Harmon":
-        labels_by_actor += [[0, 0, 0, 0, 1, 0] for i in range(len(training_sets[actor]))]
-    elif actor == "Peri Gilpin":
-        labels_by_actor += [[0, 0, 0, 0, 0, 1] for i in range(len(training_sets[actor]))]
-
-x, y, thetas = learner.generate_xyt(training_set_orig_6, labels_by_actor)
-thetas_p7 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.002, 10000)
-
-# Part 7: Multiple Actor Classification
-# Alec Baldwin:    [1,0,0,0,0,0]
-# Steve Carell:    [0,1,0,0,0,0]
-# Bill Hader:      [0,0,1,0,0,0]
-# Lorraine Bracco: [0,0,0,1,0,0]
-# Angie Harmon:    [0,0,0,0,1,0]
-# Peri Gilpin:     [0,0,0,0,0,1]
-print("\n\n >>>PART 7<<<")
-
+# Generating Sets for Gradient Descent and Running Gradient Descent
 training_set_orig_6 = []
 labels_by_actor = []
 
@@ -521,11 +520,20 @@ for actor in actors_orig:
 x, y, thetas = learner.generate_xyt(training_set_orig_6, labels_by_actor)
 thetas_p7 = learner.grad_descent(learner.quad_loss, learner.quad_loss_grad, x, y, thetas, 0.003, 10000)
 
-testactors_p7 = {key: test_sets[key] for key in actors_orig}
-testanswers_p7 = {"Alec Baldwin": [1, 0, 0, 0, 0, 0], "Steve Carell": [0, 1, 0, 0, 0, 0],
+# Testing Results
+validation_set_p7 = {key: validation_sets[key] for key in actors_orig}
+training_set_p7 = {key: training_sets[key] for key in actors_orig}
+test_answers_p7 = {"Alec Baldwin": [1, 0, 0, 0, 0, 0], "Steve Carell": [0, 1, 0, 0, 0, 0],
                   "Bill Hader": [0, 0, 1, 0, 0, 0], "Lorraine Bracco": [0, 0, 0, 1, 0, 0],
                   "Angie Harmon": [0, 0, 0, 0, 1, 0], "Peri Gilpin": [0, 0, 0, 0, 0, 1]}
-learner.test(testactors_p7, testanswers_p7, thetas_p7)
+print("\nValidation Set")
+learner.test(validation_set_p7, test_answers_p7, thetas_p7)
+print("\nTraining Set")
+learner.test(training_set_p7, test_answers_p7, thetas_p7, False)
+
+# Running Finite-Difference Gradient Test for Part 6(d)
+print("\nGradient Testing")
+learner.grad_est(x, y, thetas_p7, x.shape[1], learner.quad_loss, learner.quad_loss_grad)
 \end{lstlisting}
 
 For this part, an alpha of 0.003 and max iterations of 10000 was used for the training. Due to the multiple classification going on, a higher alpha value that previous was needed for better performance. This training obtained an accuracy of 80\% on the validation set and 96\% on the training set.
