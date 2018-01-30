@@ -34,6 +34,10 @@ def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
 
 # Gets actor image data from database website using list of actors in subset_actors
 def get_data():
+    if not os.path.isdir("./uncropped"):
+        os.mkdir("./uncropped")
+    if not os.path.isdir("./cropped"):
+        os.mkdir("./cropped")
     for a in actors:
         name = a.split()[1].lower()
         i = 0
