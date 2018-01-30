@@ -56,7 +56,7 @@ def generate_xyt(input_sets, labels):
 
 
 # Gradient descent function. Taken from CSC411 website and slightly modified.
-def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
+def grad_descent(f, df, x, y, init_t, alpha, _max_iter, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
     EPS = 1e-5  # EPS = 10**(-5)
     prev_t = init_t - 10 * EPS
@@ -67,10 +67,12 @@ def grad_descent(f, df, x, y, init_t, alpha, _max_iter):
         prev_t = t.copy()
         grad = df(x, y, t, x.shape[1])
         t -= alpha * grad
-        if iter % 9000 == 0:
+        if iter % 5000 == 0 and printing:
             print("Iter %i: cost = %.2f" % (iter, f(x, y, t, x.shape[1])))
-            # print("Gradient: ", grad, "\n")
+        elif iter % 50000 == 0:
+            print("Training...")
         iter += 1
+    print("Done!")
     return t
 
 
