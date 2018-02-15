@@ -25,7 +25,7 @@ M = loadmat("mnist_all.mat")
 
 #PART 2
 
-def compute_2(x, W, b)
+def compute(x, W, b)
     return softmax(tanh_layer(x, W, b))
 
 def softmax(y):
@@ -42,8 +42,8 @@ def tanh_layer(y, W, b):
 
 #PART 3
 def f(x, W, b, y):
-    res = compute_2(x,W,b)
-    return -1 * (dot(y.T, np.log(res)))
+    p = compute(x,W,b)
+    return -1 * (dot(y.T, np.log(p)))
 
 #PART 3a)
 '''We look to write our gradient function with respect to each weight used in our neural network W_ij. In the slides we've 
@@ -54,10 +54,15 @@ do_i / dW-ij is x_i
  '''
 
 #PART 3b)
-def df(x,y,t):
-    return np.matmul((y-t).T, x)
+'''
+We envision y and p to be (k * m) matrices and x to be (m * n) which would yield a (k * n) matrix, which we must transpose
+to get our expected weightings matrix of dimensions (n * k)
+'''
+def df(x,y,p):
+    return np.matmul((y-p).T, x).T
 
 #verification code
+W = df
 
 
 
