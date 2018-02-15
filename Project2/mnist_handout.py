@@ -17,7 +17,7 @@ import os
 from scipy.io import loadmat
 
 #Load the MNIST digit data
-M = loadmat("mnist_dataset.mat")
+M = loadmat("mnist_all.mat")
 
 #Display the 150-th "5" digit from the training set
 # imshow(M["train6"][150].reshape((28,28)), cmap=cm.gray)
