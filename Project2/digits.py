@@ -14,10 +14,12 @@ from numpy import random
 import os
 from scipy.io import loadmat
 
-#Load the MNIST digit data
-M = loadmat("mnist_all.mat")
+import mnist
 
-#PART 3
+#Load the MNIST digit data
+M = loadmat("mnist_dataset.mat")
+
+#PART 1
 
 #save 10 images, 1 from each digit
 # for i in range(10):
@@ -25,24 +27,12 @@ M = loadmat("mnist_all.mat")
 
 #PART 2
 
-def compute(x, W, b)
-    return softmax(tanh_layer(x, W, b))
-
-def softmax(y):
-    '''Return the output of the softmax function for the matrix of output y. y
-    is an NxM matrix where N is the number of outputs for a single case, and M
-    is the number of cases'''
-    return exp(y)/tile(sum(exp(y),0), (len(y),1))
-    
-def tanh_layer(y, W, b):    
-    '''Return the output of a tanh layer for the input matrix y. y
-    is an NxM matrix where N is the number of inputs for a single case, and M
-    is the number of cases'''
-    return tanh(dot(W.T, y)+b)
+def part2(x, W, b):
+    return mnist.softmax(mnist.tanh_layer(x, W, b))
 
 #PART 3
 def f(x, W, b, y):
-    p = compute(x,W,b)
+    p = part2(x, W, b)
     return -1 * (dot(y.T, np.log(p)))
 
 #PART 3a)
