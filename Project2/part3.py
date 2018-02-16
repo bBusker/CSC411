@@ -28,7 +28,8 @@ do_i / dW-ij is x_i
 We envision y and p to be (k * m) matrices and x to be (n * m) which would yield a (k * n) matrix, which we must transpose
 to get our expected weightings gradient matrix of dimensions (n * k)
 '''
-def df(x,y,p):
+def df(x,y,W,b):
+    p = part2.forward(x, W, b)
     return np.matmul((y-p), x.T).T
 
 #placeholder
@@ -39,7 +40,8 @@ def part3():
 
     #For our images, n = 7084, and our result ranges from 0 through 9, therefore k = 10.
     # W is (n * k)
-    W = np.zeros(shape = (N_NUM,K_NUM))
+    W = np.ones(shape = (N_NUM,K_NUM))
+    #W = np.random.rand(N_NUM, K_NUM)
     b = np.zeros(shape = (K_NUM,M_TRAIN))
 
     x = np.zeros(shape = (N_NUM, M_TRAIN))
@@ -53,6 +55,24 @@ def part3():
         y[i, count: count + currSet.shape[1]] = 1
         count += currSet.shape[1]
 
-    cost = f(x,W,b,y)
+    scale = 10
+    b = b[:, 0:M_TRAIN / scale]
+    x = x[:, 0:M_TRAIN / scale]
+    y = y[:, 0:M_TRAIN / scale]
+
+    h = 1e-10
+    grad = df(x,y, W, b)
+
+    print  "%.20f" % sum(grad)
+    
+    print "done calculating gradient"
+
+    for i in range(200):
+        W_perturbed = W
+        W_perturbed[350 + i,0] = W_perturbed[350 + i, 0] + h
+        approx_grad = (f(x,W_perturbed,b,y) - f(x,W,b,y))/h
+
+        print "grad: %.10f approximate grad: %.10f" %(grad[10 + i, 0] * 1e10, approx_grad * 1e10)
+    
 
     return 0
