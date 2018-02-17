@@ -18,12 +18,11 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
 
     while iter < max_iter: #and norm(t - prev_t) > EPS:
         prev_t = W.copy()
-        grad = df(x, y, W, np.zeros(shape=(K_NUM,1)))
+        b = np.zeros(shape=(K_NUM,1))
+        grad = df(x, y, W, b)
         W -= alpha * grad + momentum * prev_grad
-        if iter % 5000 == 0 and printing:
-            print(grad)
-            print("Iter %i: cost = %.2f" % (iter, 1)) #f(x, y, W, x.shape[1])))
-            print(W)
+        if iter % 100 == 0 and printing:
+            print("Iter %i: cost = %.2f" % (iter,  f(x, W, b, y)))
         elif iter % 50000 == 0:
             print("Training...")
         iter += 1
@@ -44,6 +43,22 @@ def generate_sets(database, size):
 
     return train_set.T, sol_set
 
+def alt_gen_set(database, scale):
+    x = np.zeros(shape = (N_NUM, M_TRAIN))
+    y = np.zeros(shape = (K_NUM, M_TRAIN))
+
+    count = 0
+    #Load our example
+    for i in range(10):
+        currSet = database["train" + str(i)].T / 255.0
+        x[:, count: count + currSet.shape[1]] = currSet      
+        y[i, count: count + currSet.shape[1]] = 1
+        count += currSet.shape[1] 
+
+    x = x[:, 0:M_TRAIN / scale]
+    y = y[:, 0:M_TRAIN / scale]
+
+    return x,y
 
 def test(database, size, W, b):
     test_set = []
@@ -68,7 +83,8 @@ def part4(alpha, _max_iter, printing):
     #TODO: bias
     #for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
-    train_set, sol_set = generate_sets(M, 10)
+    # train_set, sol_set = generate_sets(M, 10)
+    train_set, sol_set = alt_gen_set(M, 5)
     W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0, printing)
     print(W)
     #results += [test(M, 20, W, np.zeros((10)))]
