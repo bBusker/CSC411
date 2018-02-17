@@ -11,7 +11,9 @@ def softmax(y):
     '''Return the output of the softmax function for the matrix of output y. y
     is an (k * m) matrix where k is the number of outputs for a single case, and m
     is the number of cases'''
-    return exp(y) / tile(sum(exp(y), 0), (len(y), 1))
+    e_y = np.exp(y - np.max(y))
+    return e_y / e_y.sum()
+    # return exp(y) / tile(sum(exp(y), 0), (len(y), 1))
 
 
 def tanh_layer(x, W, b):

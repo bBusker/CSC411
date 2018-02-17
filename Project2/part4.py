@@ -84,7 +84,7 @@ def part4(alpha, _max_iter, printing):
     #for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
     # train_set, sol_set = generate_sets(M, 10)
-    train_set, sol_set = alt_gen_set(M, 5)
+    train_set, sol_set = alt_gen_set(M, 1)
     W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0, printing)
     print(W)
     #results += [test(M, 20, W, np.zeros((10)))]
