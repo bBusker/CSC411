@@ -13,6 +13,7 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
     prev_t = init_W - 10 * EPS
     prev_grad = 0
     W = init_W.copy()
+    V = np.zeros(shape = W.shape)
     max_iter = _max_iter
     iter = 0
 
@@ -20,7 +21,9 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
         prev_t = W.copy()
         b = np.zeros(shape=(K_NUM,1))
         grad = df(x, y, W, b)
-        W -= alpha * grad + momentum * prev_grad
+        V = momentum * V + alpha * grad
+        # W -= alpha * grad
+        W -= V
         if iter % 100 == 0 and printing:
             print("Iter %i: cost = %.2f" % (iter,  f(x, W, b, y)))
         elif iter % 50000 == 0:
@@ -85,7 +88,7 @@ def part4(alpha, _max_iter, printing):
     W = np.zeros((784, 10))
     # train_set, sol_set = generate_sets(M, 10)
     train_set, sol_set = alt_gen_set(M, 1)
-    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0, printing)
+    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0.9, printing)
     print(W)
     #results += [test(M, 20, W, np.zeros((10)))]
     #x += [0]
