@@ -13,7 +13,7 @@ x is (n * m)
 '''
 def f(x, W, b, y):
     p = part2.forward(x,W,b)
-    return -1 * sum( dot(y.T, np.log(p)))
+    return -sum(y*log(p))
 
 #PART 3a)
 '''We look to write our gradient function with respect to each weight used in our neural network W_ij. In the slides we've 
@@ -30,7 +30,7 @@ to get our expected weightings gradient matrix of dimensions (n * k)
 '''
 def df(x,y,W,b):
     p = part2.forward(x, W, b)
-    return np.matmul((y-p), x.T).T
+    return np.matmul((p-y), x.T).T
 
 #placeholder
 def part3():
@@ -40,9 +40,9 @@ def part3():
 
     #For our images, n = 7084, and our result ranges from 0 through 9, therefore k = 10.
     # W is (n * k)
-    W = np.ones(shape = (N_NUM,K_NUM))
-    #W = np.random.rand(N_NUM, K_NUM)
-    b = np.zeros(shape = (K_NUM,M_TRAIN))
+    # W = np.ones(shape = (N_NUM,K_NUM))
+    W = np.random.rand(N_NUM, K_NUM)
+    b = np.ones(shape = (K_NUM,1))
 
     x = np.zeros(shape = (N_NUM, M_TRAIN))
     y = np.zeros(shape = (K_NUM, M_TRAIN))
@@ -55,30 +55,22 @@ def part3():
         y[i, count: count + currSet.shape[1]] = 1
         count += currSet.shape[1]
 
-    scale = 10
+    scale = 2 #scale to only include a subsection of the 60000 images
     b = b[:, 0:M_TRAIN / scale]
     x = x[:, 0:M_TRAIN / scale]
     y = y[:, 0:M_TRAIN / scale]
 
-    print f(x,W,b,y)
-
-    h = 1
+    h = 0.00001
     grad = df(x,y, W, b)
-
-    print  "%.20f" % sum(grad)
     
     print "done calculating gradient"
 
-    for i in range(200):
-        W_perturbed = W
-        W_perturbed[350 + i,0] = W_perturbed[350 + i, 0] + h
-        a = f(x,W_perturbed,b,y)
-        b = f(x,W, b, y)
-        print a
-        print b
-        approx_grad = (a - b)/h
+    for i in range(10):
+        W_perturbed = W.copy()
+        W_perturbed[350 + i,0] = W[350 + i, 0] + h
+        approx_grad = (f(x,W_perturbed,b,y) - f(x,W,b,y))/h
 
-        print "grad: %.10f approximate grad: %.10f" %(grad[10 + i, 0] * 1e3, approx_grad * 1e3)
+        print "grad: %.3f approximate grad: %.3f" %(grad[350 + i, 0], approx_grad)
     
 
     return 0

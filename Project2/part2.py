@@ -4,9 +4,7 @@ import numpy as np
 # PART 2
 
 def forward(x, W, b):
-    # W = np.vstack((b, W))
-    # x = np.vstack((ones((1, x.shape[1])), x))
-    return softmax(dot(W.T, x))
+    return softmax(dot(W.T, x) + np.matmul(b, np.ones(shape=(1,x.shape[1]))))
 
 
 def softmax(y):

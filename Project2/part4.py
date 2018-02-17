@@ -18,7 +18,7 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
 
     while iter < max_iter: #and norm(t - prev_t) > EPS:
         prev_t = W.copy()
-        grad = df(x, y, W, np.zeros(K_NUM))
+        grad = df(x, y, W, np.zeros(shape=(K_NUM,1)))
         W -= alpha * grad + momentum * prev_grad
         if iter % 5000 == 0 and printing:
             print(grad)
