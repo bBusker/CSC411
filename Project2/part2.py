@@ -1,10 +1,12 @@
 from pylab import *
-
+import numpy as np
 
 # PART 2
 
 def forward(x, W, b):
-    return softmax(dot(W.T, x) + b)
+    # W = np.vstack((b, W))
+    # x = np.vstack((ones((1, x.shape[1])), x))
+    return softmax(dot(W.T, x))
 
 
 def softmax(y):
