@@ -13,7 +13,7 @@ x is (n * m)
 '''
 def f(x, W, b, y):
     p = part2.forward(x,W,b)
-    return -sum(y*log(p))
+    return -sum(y*log(p)) / x.shape[1]
 
 #PART 3a)
 '''We look to write our gradient function with respect to each weight used in our neural network W_ij. In the slides we've 
