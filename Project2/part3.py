@@ -60,7 +60,9 @@ def part3():
     x = x[:, 0:M_TRAIN / scale]
     y = y[:, 0:M_TRAIN / scale]
 
-    h = 1e-10
+    print f(x,W,b,y)
+
+    h = 1
     grad = df(x,y, W, b)
 
     print  "%.20f" % sum(grad)
@@ -70,9 +72,13 @@ def part3():
     for i in range(200):
         W_perturbed = W
         W_perturbed[350 + i,0] = W_perturbed[350 + i, 0] + h
-        approx_grad = (f(x,W_perturbed,b,y) - f(x,W,b,y))/h
+        a = f(x,W_perturbed,b,y)
+        b = f(x,W, b, y)
+        print a
+        print b
+        approx_grad = (a - b)/h
 
-        print "grad: %.10f approximate grad: %.10f" %(grad[10 + i, 0] * 1e10, approx_grad * 1e10)
+        print "grad: %.10f approximate grad: %.10f" %(grad[10 + i, 0] * 1e3, approx_grad * 1e3)
     
 
     return 0
