@@ -5,7 +5,7 @@ from pylab import *
 import matplotlib.pyplot as plt
 import numpy as np
 from constants import *
-
+import cPickle as pickle
 
 def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
@@ -71,6 +71,7 @@ def part5(alpha, _max_iter, printing):
     # for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
     train_set, sol_set = generate_sets(M, 10)
-    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0.001, printing)
+    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0.95, printing)
+    pickle.dump( W, open( "part5W.p", "wb" ) )
     results += [test(M, 20, W, np.zeros((10)))]
     x += [0]
