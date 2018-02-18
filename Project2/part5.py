@@ -13,13 +13,17 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
     prev_t = init_W - 10 * EPS
     prev_grad = 0
     W = init_W.copy()
+    V = np.zeros(shape = W.shape)
     max_iter = _max_iter
     iter = 0
 
     while iter < max_iter: #and norm(t - prev_t) > EPS:
         prev_t = W.copy()
-        grad = df(x, y, W)
-        W -= alpha * grad + momentum * prev_grad
+        b = np.zeros(shape=(K_NUM,1))
+        grad = df(x, y, W, b)
+        V = momentum * V + alpha * grad
+        # W -= alpha * grad
+        W -= V
         if iter % 5000 == 0 and printing:
             print("Iter %i: cost = %.2f" % (iter, f(x, y, W, x.shape[1])))
         elif iter % 50000 == 0:
