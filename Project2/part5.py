@@ -46,6 +46,22 @@ def generate_sets(database, size):
 
     return train_set.T, sol_set
 
+def alt_gen_set(database, scale):
+    x = np.zeros(shape = (N_NUM, M_TRAIN))
+    y = np.zeros(shape = (K_NUM, M_TRAIN))
+
+    count = 0
+    #Load our example
+    for i in range(10):
+        currSet = database["train" + str(i)].T / 255.0
+        x[:, count: count + currSet.shape[1]] = currSet      
+        y[i, count: count + currSet.shape[1]] = 1
+        count += currSet.shape[1] 
+
+    x = x[:, 0:M_TRAIN / scale]
+    y = y[:, 0:M_TRAIN / scale]
+
+    return x,y
 
 def test(database, size, W, b):
     test_set = []
@@ -70,7 +86,8 @@ def part5(alpha, _max_iter, printing):
     # TODO: bias
     # for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
-    train_set, sol_set = generate_sets(M, 10)
+    # train_set, sol_set = generate_sets(M, 10)
+    train_set, sol_set = alt_gen_set(M, 1)
     W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0.95, printing)
     pickle.dump( W, open( "part5W.p", "wb" ) )
     results += [test(M, 20, W, np.zeros((10)))]
