@@ -12,15 +12,14 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
     print("------------------------- Starting Grad Descent -------------------------")
     EPS = 1e-5  # EPS = 10**(-5)
     prev_t = init_W - 10 * EPS
-    prev_grad = 0
     W = init_W.copy()
     V = np.zeros(shape = W.shape)
     max_iter = _max_iter
     iter = 0
+    b = np.zeros(shape=(K_NUM, 1))
 
     while iter < max_iter: #and norm(t - prev_t) > EPS:
-        prev_t = W.copy()
-        b = np.zeros(shape=(K_NUM,1))
+        #prev_t = W.copy()
         grad = df(x, y, W, b)
         W -= alpha * grad
         if iter % 100 == 0 and printing:
@@ -28,7 +27,6 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
         elif iter % 50000 == 0:
             print("Training...")
         iter += 1
-        prev_grad = grad
 
     print("Done!")
     return W
@@ -36,14 +34,14 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
 
 def generate_sets(database, size):
     train_set = np.zeros((size, N_NUM))
-    sol_set = np.zeros((size))
+    sol_set = np.zeros((size, 10))
 
     for i in range(size):
         rand_dgt = np.random.random_integers(0,9)
-        train_set[i] = database["train"+str(rand_dgt)][i]
-        sol_set [i] = rand_dgt
+        train_set[i] = database["train"+str(rand_dgt)][i] / 255.0
+        sol_set [i][rand_dgt] = 1
 
-    return train_set.T, sol_set
+    return train_set.T, sol_set.T
 
 def alt_gen_set(database, scale):
     x = np.zeros(shape = (N_NUM, M_TRAIN))
@@ -70,10 +68,10 @@ def test(database, size, W, b):
         rand_dgt = np.random.random_integers(0, 9)
         test_set += [database["test"+str(rand_dgt)][i]]
         guess = part2.forward(test_set[i], W, b)
-        if guess == rand_dgt:
+        if np.argmax(guess[0]) == rand_dgt:
             correct += 1
 
-    return correct/size
+    return correct/float(size)
 
 
 def part4(alpha, _max_iter, printing):
@@ -85,11 +83,13 @@ def part4(alpha, _max_iter, printing):
     #TODO: bias
     #for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
-    # train_set, sol_set = generate_sets(M, 10)
-    train_set, sol_set = alt_gen_set(M, 1)
+    train_set, sol_set = generate_sets(M, 1000)
+    t_s, s_s = alt_gen_set(M, 1)
     W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0, printing)
-    print(W)
+    print(sum(W.T[0]))
     pickle.dump( W, open( "part4W.p", "wb" ) )
+    b = np.zeros((10, 1))
+    print("Testing... {}% correct".format(test(M, 100, W, b)*100))
     #results += [test(M, 20, W, np.zeros((10)))]
     #x += [0]
 
