@@ -8,7 +8,7 @@ from constants import *
 import cPickle as pickle
 
 
-def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=True):
+def grad_descent(f, df, x, y, init_W, alpha, _max_iter, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
     EPS = 1e-5  # EPS = 10**(-5)
     prev_t = init_W - 10 * EPS
@@ -85,7 +85,7 @@ def part4(alpha, _max_iter, printing):
     W = np.zeros((784, 10))
     train_set, sol_set = generate_sets(M, 1000)
     t_s, s_s = alt_gen_set(M, 1)
-    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0, printing)
+    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, printing)
     print(sum(W.T[0]))
     pickle.dump( W, open( "part4W.p", "wb" ) )
     b = np.zeros((10, 1))
