@@ -24,8 +24,8 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
         V = momentum * V + alpha * grad
         # W -= alpha * grad
         W -= V
-        if iter % 5000 == 0 and printing:
-            print("Iter %i: cost = %.2f" % (iter, f(x, y, W, x.shape[1])))
+        if iter % 100 == 0 and printing:
+            print("Iter %i: cost = %.5f" % (iter,  f(x, W, b, y)))
         elif iter % 50000 == 0:
             print("Training...")
         iter += 1
@@ -37,14 +37,14 @@ def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=Tru
 
 def generate_sets(database, size):
     train_set = np.zeros((size, N_NUM))
-    sol_set = np.zeros((size))
+    sol_set = np.zeros((size, 10))
 
     for i in range(size):
         rand_dgt = np.random.random_integers(0,9)
-        train_set[i] = database["train"+str(rand_dgt)][i]
-        sol_set [i] = rand_dgt
+        train_set[i] = database["train"+str(rand_dgt)][i] / 255.0
+        sol_set [i][rand_dgt] = 1
 
-    return train_set.T, sol_set
+    return train_set.T, sol_set.T
 
 def alt_gen_set(database, scale):
     x = np.zeros(shape = (N_NUM, M_TRAIN))
@@ -86,9 +86,9 @@ def part5(alpha, _max_iter, printing):
     # TODO: bias
     # for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
-    # train_set, sol_set = generate_sets(M, 10)
+    # train_set, sol_set = generate_sets(M, 1000)
     train_set, sol_set = alt_gen_set(M, 1)
     W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, 0.95, printing)
     pickle.dump( W, open( "part5W.p", "wb" ) )
-    results += [test(M, 20, W, np.zeros((10)))]
-    x += [0]
+    # results += [test(M, 20, W, np.zeros((10)))]
+    # x += [0]

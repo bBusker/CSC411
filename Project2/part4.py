@@ -83,13 +83,13 @@ def part4(alpha, _max_iter, printing):
     #TODO: bias
     #for i in range(0, M_TRAIN, 100):
     W = np.zeros((784, 10))
-    train_set, sol_set = generate_sets(M, 1000)
-    t_s, s_s = alt_gen_set(M, 1)
+    # train_set, sol_set = generate_sets(M, 1000)
+    train_set, sol_set = alt_gen_set(M, 1)
     W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, printing)
-    print(sum(W.T[0]))
     pickle.dump( W, open( "part4W.p", "wb" ) )
+
     b = np.zeros((10, 1))
-    print("Testing... {}% correct".format(test(M, 100, W, b)*100))
+    # print("Testing... {}% correct".format(test(M, 100, W, b)*100))
     #results += [test(M, 20, W, np.zeros((10)))]
     #x += [0]
 
