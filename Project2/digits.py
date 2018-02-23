@@ -7,7 +7,7 @@ import part3
 import part4
 import part5
 import part6
-import part8
+import part89
 
 # part1.part1()
 # part2.part2()
@@ -15,4 +15,4 @@ import part8
 # part4.part4(0.00001, 5000, True)
 # part5.part5(0.00001, 5000, True)
 # part6.part6()
-part8.part8()
+part89.part89()
