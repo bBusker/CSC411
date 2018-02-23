@@ -85,7 +85,7 @@ def part4(alpha, _max_iter, printing):
     W = np.zeros((784, 10))
     # train_set, sol_set = generate_sets(M, 1000)
     train_set, sol_set = alt_gen_set(M, 1)
-    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, printing)
+    # W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha, _max_iter, printing)
     pickle.dump( W, open( "part4W.p", "wb" ) )
 
     b = np.zeros((10, 1))
