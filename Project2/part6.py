@@ -9,39 +9,43 @@ from constants import *
 import cPickle as pickle
 
 def part6a():
-    W = pickle.load(open("part5W.p", 'rb')) #load weights
+    W = pickle.load(open("part4W.p", 'rb')) #load weights
     W_copy = W.copy()
-    print W[w1, w1k]
-    print W[w2, w2k]
 
     #picking 2 weights near the center, we will take the 14th pixel in the 11th row and the 14th pixel in the 17th
     #10 * 28 + 13 = 293
     #16 * 28 + 13 = 461 as our values of n, and any output may be chosen [0,9]
 
-    dimension = 5
+    print W[w1, w1k]
+    print W[w2, w2k]
+
+    dimension = 10
 
     M = loadmat("mnist_all.mat")
     x, y = alt_gen_set(M, 1)
     b = np.ones(shape = (K_NUM,1))
 
-    X1 = np.linspace(-1, 1, dimension)
-    X2 = np.linspace(-1, 1, dimension)
+    X1 = np.linspace(0, 4, dimension)
+    X2 = np.linspace(0, 4, dimension)
 
     res_a = np.zeros(shape = (dimension,dimension))
-    max_deviation = 6
+    max_deviation = 1
     for i in range(dimension):
         for j in range(dimension):
-            W[w1, w1k] = W_copy[w1,w1k] + X1[i] * max_deviation 
-            W[w2, w2k] = W_copy[w2,w2k] + X2[j] * max_deviation
+            # W[w1, w1k] = W_copy[w1,w1k] + X1[i] * max_deviation 
+            # W[w2, w2k] = W_copy[w2,w2k] + X2[j] * max_deviation
+            W[w1, w1k] = X1[i]
+            W[w2, w2k] = X2[j]
             res_a[i, j] = part3.f(x,W,b,y)
             print "done " + str(i) + " " + str(j) + " cost: " + str(res_a[i,j]) + " with w values: " + str(W[w1, w1k]) + " " + str(W[w2,w2k])
             
-    return W_copy[w1,w1k] + max_deviation*X1, W_copy[w2,w2k] + max_deviation*X2, res_a
+    return X1, X2, res_a
+    # return W_copy[w1,w1k] + max_deviation*X1, W_copy[w2,w2k] + max_deviation*X2, res_a
     
 K = 10
-w1 = 362
+w1 = 304
 w1k = 5
-w2 = 360
+w2 = 305
 w2k = 5
 
 def part6bcd():
@@ -49,11 +53,12 @@ def part6bcd():
     W = pickle.load(open("part5W.p", 'rb')) #load weights
     x,y = alt_gen_set(M, 1)
 
-    W[w1, w1k], W[w2, w2k] = -2,3
-    W, res_b = grad_descent_2element(part3.f, part3.df, x, y, W, 0.1,20, 0, True)
+    W[w1, w1k], W[w2, w2k] = 0.1,1.5 
+    print argmax(W)
+    W, res_b = grad_descent_2element(part3.f, part3.df, x, y, W, 0.005,20, 0, True)
 
-    W[w1, w1k], W[w2, w2k] = -2,3
-    W, res_c = grad_descent_2element(part3.f, part3.df, x, y, W, 0.1,20, 0.90, True)
+    W[w1, w1k], W[w2, w2k] = 0.1,1.5
+    W, res_c = grad_descent_2element(part3.f, part3.df, x, y, W, 0.005,20, 0.7, True)
 
     return res_b, res_c
 
