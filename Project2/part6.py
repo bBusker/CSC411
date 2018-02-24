@@ -21,67 +21,59 @@ def batch(x, y, batch_size, seed = 1):
         yield x_batched[:, m*batch_size:(m+1)*batch_size], y_batched[:,m*batch_size:(m+1)*batch_size]
 
 def part6a():
-    W = pickle.load(open("part4W.p", 'rb')) #load weights
-    W_copy = W.copy()
-
-    #picking 2 weights near the center, we will take the 14th pixel in the 11th row and the 14th pixel in the 17th
-    #10 * 28 + 13 = 293
-    #16 * 28 + 13 = 461 as our values of n, and any output may be chosen [0,9]
-
-    print np.mean(W)
-
-    dimension = 70
+    W, b = pickle.load(open("part5W.p", 'rb')) #load weights
+    dimension = 15
 
     M = loadmat("mnist_all.mat")
     x, y = alt_gen_set(M, 1)
-    b = np.ones(shape = (K_NUM,1))
 
-    X1 = np.linspace(0, 6, dimension)
-    X2 = np.linspace(0, 6, dimension)
+    orig1 = W[w1, w1k]
+    orig2 = W[w2, w2k]
 
-    res_a = np.zeros(shape = (dimension,dimension))
+    print orig1 
+    print orig2
+
+    X1 = np.linspace(-5, 5, 10)
+    X2 = np.linspace(-5, 5, 10)
+
+    res_a = np.zeros(shape = (X1.size,X1.size))
     max_deviation = 1
-    for i in range(dimension):
-        for j in range(dimension):
-            # W[w1, w1k] = W_copy[w1,w1k] + X1[i] * max_deviation 
-            # W[w2, w2k] = W_copy[w2,w2k] + X2[j] * max_deviation
+    for i, w1v in enumerate(X1):
+        for j, w2v in enumerate(X2):
             W[w1, w1k] = X1[i]
             W[w2, w2k] = X2[j]
             res_a[i, j] = part3.f(x,W,b,y)
-            if j == 0:
+            if True:
                 print "done " + str(i) + " " + str(j) + " cost: " + str(res_a[i,j]) + " with w values: " + str(W[w1, w1k]) + " " + str(W[w2,w2k])
             
     return X1, X2, res_a
-    # return W_copy[w1,w1k] + max_deviation*X1, W_copy[w2,w2k] + max_deviation*X2, res_a
     
 K = 10
-w1 = 304
+w1 = 361
 w1k = 5
-w2 = 305
+w2 = 331
 w2k = 5
 
 def part6bcd():
     M = loadmat("mnist_all.mat")
-    W = pickle.load(open("part5W.p", 'rb')) #load weights
+    W, b = pickle.load(open("part5W.p", 'rb')) #load weights
     x,y = alt_gen_set(M, 1)
 
+    W[w1, w1k], W[w2, w2k] = -3,-3
+    W, res_b = grad_descent_2element(part3.f, part3.df, x, y,b, W, 0.3,20, 0, True)
 
-
-    W[w1, w1k], W[w2, w2k] = 3,5.5 
-    W, res_b = grad_descent_2element(part3.f, part3.df, x, y, W, 0.15,20, 0, True)
-
-    W[w1, w1k], W[w2, w2k] = 3,5.5
-    W, res_c = grad_descent_2element(part3.f, part3.df, x, y, W, 0.15,20, 0.5, True)
+    W[w1, w1k], W[w2, w2k] = -3,-3
+    W, res_c = grad_descent_2element(part3.f, part3.df, x, y,b, W, 0.3,20, 0.7, True)
 
     return res_b, res_c
 
 
 
-def grad_descent_2element(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=True):
+def grad_descent_2element(f, df, x, y, b, init_W, alpha, _max_iter, momentum=0, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
     gen = batch(x, y, 5000, 1)
     
-    EPS = 1e-5  # EPS = 10**(-5)
+    EPS = 1e-1  # EPS = 10**(-5)
     prev_t = init_W - 10 * EPS
     prev_grad = 0
     W = init_W.copy()
@@ -94,8 +86,7 @@ def grad_descent_2element(f, df, x, y, init_W, alpha, _max_iter, momentum=0, pri
         xgen,ygen= next(gen)
         prev_t = W.copy()
         res.append((W[w1, w1k], W[w2, w2k]))
-        b = np.zeros(shape=(K_NUM,1))
-        grad = df(xgen, ygen, W, b)
+        grad, grad_W = df(xgen, ygen, W, b)
         V = momentum * V + alpha * grad
         # W -= alpha * grad
         W[w1, w1k] -= V[w1, w1k]
@@ -110,17 +101,22 @@ def grad_descent_2element(f, df, x, y, init_W, alpha, _max_iter, momentum=0, pri
     return W, res
 
 def part6():
-    X1, X2, res = part6a()
+    X,Y, res = part6a()
+
+    Y,X = np.meshgrid(X,Y)
+
+    print argmin(res)
+
     a_weights, b_weights = part6bcd()
-    print a_weights
-    print b_weights
+    # print a_weights
+    # print b_weights
     
-    plt.contour(X1, X2, res)
+    CS = plt.contour(X, Y, res, label='Cost Function')
     plt.autoscale(False) # To avoid that the scatter changes limits
     plt.plot([a for a, b in a_weights], [b for a,b in a_weights], 'yo-', label="No Momentum")
     plt.plot([a for a, b in b_weights], [b for a,b in b_weights], 'go-', label="Momentum")
     plt.legend(loc='upper left')
     fig = plt.gcf()
-    fig.savefig('part5fig.png')
+    fig.savefig('part6badfig.png')
     plt.show()
     
