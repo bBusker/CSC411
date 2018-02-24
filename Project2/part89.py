@@ -19,42 +19,10 @@ actors = ['bracco', 'gilpin', 'harmon', 'carell', 'baldwin', 'hader']
 ordering = []
 num_actors = 6
 
-def testshit():
-    from scipy.io import loadmat
-    M = loadmat("mnist_all.mat")
-    def get_test(M):
-        batch_xs = np.zeros((0, 28*28*3))
-        batch_y_s = np.zeros( (0, 10))
-        
-        test_k =  ["test"+str(i) for i in range(10)]
-        for k in range(10):
-            batch_xs = np.vstack((batch_xs, ((np.array(M[test_k[k]])[:])/255.)  ))
-            one_hot = np.zeros(10)
-            one_hot[k] = 1
-            batch_y_s = np.vstack((batch_y_s,   np.tile(one_hot, (len(M[test_k[k]]), 1))   ))
-        return batch_xs, batch_y_s
-
-
-    def get_train(M):
-        batch_xs = np.zeros((0, 28*28*3))
-        batch_y_s = np.zeros( (0, 10))
-        
-        train_k =  ["train"+str(i) for i in range(10)]
-        for k in range(10):
-            batch_xs = np.vstack((batch_xs, ((np.array(M[train_k[k]])[:])/255.)  ))
-            one_hot = np.zeros(10)
-            one_hot[k] = 1
-            batch_y_s = np.vstack((batch_y_s,   np.tile(one_hot, (len(M[train_k[k]]), 1))   ))
-        return batch_xs, batch_y_s
-            
-
-    train_x, train_y = get_train(M)
-    test_x, test_y = get_test(M)
-
-def loadImages():
+def loadImages(s_x, s_y):
     global encoding, actors, ordering, num_actors
 
-    imgs = np.zeros(shape = (32 * 32 * 3,num_actors * 120)) #n-1 = 1024, m = num_actors*120 = 720 training sets
+    imgs = np.zeros(shape = (s_x * s_y * 3,num_actors * 120)) #n-1 = 1024, m = num_actors*120 = 720 training sets
     labels = np.zeros(shape = (num_actors, num_actors * 120)) #k x m
     #theta = np.random.randn(1025 * 6).reshape((1025,6))
 
@@ -66,7 +34,7 @@ def loadImages():
             for file in os.listdir('shrunk/'+folder):
                 if count < 120:
                     try:
-                        imgs[:, count + 120 * person] = imresize(imread('shrunk/'+folder+'/'+file), (32,32)).flatten()
+                        imgs[:, count + 120 * person] = imresize(imread('shrunk/'+folder+'/'+file), (s_x,s_y)).flatten()
                         labels[:, count + 120 * person] = encoding[folder]
                         count += 1
                     except:
@@ -75,15 +43,15 @@ def loadImages():
                     break
             person += 1
 
-    imgs = imgs/255.0
+    # imgs = imgs/255.0
     
-    trainingset = np.zeros(shape = (3072, num_actors * 80))
+    trainingset = np.zeros(shape = (s_x*s_y*3, num_actors * 80))
     traininglabels = np.zeros(shape = (num_actors, num_actors * 80))
 
-    validationset = np.zeros(shape = (3072, num_actors*20))
+    validationset = np.zeros(shape = (s_x*s_y*3, num_actors*20))
     validationlabels = np.zeros(shape = (num_actors, num_actors*20))
 
-    testset = np.zeros(shape = (3072, num_actors*20))
+    testset = np.zeros(shape = (s_x*s_y*3, num_actors*20))
     testlabels = np.zeros(shape = (num_actors, num_actors * 20))
 
     for i in range(num_actors):
@@ -99,7 +67,7 @@ def loadImages():
     return trainingset.T, traininglabels.T, validationset.T, validationlabels.T, testset.T, testlabels.T
 
 def part89():
-    trainingset, traininglabels, validationset, validationlabels, testset, testlabels = loadImages()
+    trainingset, traininglabels, validationset, validationlabels, testset, testlabels = loadImages(32,32)
 
     np.random.seed(1)
     torch.manual_seed(0)
@@ -108,11 +76,10 @@ def part89():
     dim_out = 6
     dim_h = 24
     dtype_float = torch.FloatTensor
-    dtype_long = torch.LongTensor\
+    dtype_long = torch.LongTensor
 
-    train_idx = np.random.permutation(range(trainingset.shape[0]))[:480]
+    train_idx = np.random.permutation(range(trainingset.shape[0]))[:480] #480 for currently using all images
     x = Variable(torch.from_numpy(trainingset[train_idx]), requires_grad=False).type(dtype_float)
-    y = Variable(torch.from_numpy(traininglabels), requires_grad=False).type(dtype_float)
     y_classes = Variable(torch.from_numpy(np.argmax(traininglabels[train_idx], 1)), requires_grad=False).type(dtype_long)
 
     model = torch.nn.Sequential(
