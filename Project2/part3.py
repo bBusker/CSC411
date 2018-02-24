@@ -30,7 +30,11 @@ to get our expected weightings gradient matrix of dimensions (n * k)
 '''
 def df(x,y,W,b):
     p = part2.forward(x, W, b)
-    return np.matmul((p-y), x.T).T
+
+    grad_w = np.matmul((p-y), x.T).T
+    grad_b = np.sum((p-y), 1).reshape((10,1))
+
+    return grad_w, grad_b
 
 #placeholder
 def part3():
