@@ -10,11 +10,11 @@ import part6
 import part89
 import part10
 
-part1.part1()
+# part1.part1()
 # part2.part2()
 # part3.part3()
 # part4.part4(0.00001, 5000, True)
 # part5.part5(0.00001, 5000, True)
 # part6.part6()
-# part89.part89()
+part89.part89()
 # part10.part10()
