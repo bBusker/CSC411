@@ -103,17 +103,13 @@ def part4(alpha_w, alpha_b, _max_iter, printing):
     results_val = []
     results_train = []
     x = []
+    train_set, train_set_sol, val_set, val_set_sol = generate_sets(M, 10000)
+    W_init = np.random.rand(784, 10)
 
-
-    for i in range(5000, M_TRAIN - 7000, 5000):
-        if i<5000:
-            continue
+    for i in range(100, 500, 100):
         print(i)
-        W = np.zeros((784, 10))
-        W = np.random.rand(784, 10)
-        train_set, train_set_sol, val_set, val_set_sol = generate_sets(M, i)
-        # train_set, sol_set = alt_gen_set(M, 1)
-        W, b = grad_descent(part3.f, part3.df, train_set, train_set_sol, W, alpha_w, alpha_b, _max_iter, printing)
+        #train_set, sol_set = alt_gen_set(M, 1)
+        W, b = grad_descent(part3.f, part3.df, train_set, train_set_sol, W_init, alpha_w, alpha_b, i, printing)
         #b = np.ones((10, 1))*100
         #print(W, b)
         # print("Testing... {}% correct".format(test(M, 500, W, b)*100))
@@ -121,8 +117,9 @@ def part4(alpha_w, alpha_b, _max_iter, printing):
         results_train += [test2(train_set, train_set_sol, W, b)]
         x += [i]
 
-    pickle.dump(W, open("part4W.p", "wb"))
+    pickle.dump(W, open("part4W_shichen.p", "wb"))
     plt.plot(x, results_val)
     plt.plot(x, results_train)
     plt.legend(["Validation Set Accuracy", "Training Set Accuracy"])
+    plt.title("Part 4 Learning Curve")
     plt.show()
