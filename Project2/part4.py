@@ -86,11 +86,11 @@ def part4(alpha_w, alpha_b, _max_iter, printing):
     W = np.zeros((784, 10))
     # train_set, sol_set = generate_sets(M, 1000)
     train_set, sol_set = alt_gen_set(M, 1)
-    W, b = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha_w, alpha_b, _max_iter, printing)
+    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha_w, alpha_b, _max_iter, printing)
     pickle.dump( W, open( "part4W.p", "wb" ) )
     #b = np.zeros((10, 1))
-    print(W, b)
-    print("Testing... {}% correct".format(test(M, 500, W, b)*100))
+    print(W)
+    print("Testing... {}% correct".format(test(M, 500, W[0], W[1])*100))
     #results += [test(M, 20, W, np.zeros((10)))]
     #x += [0]
 
