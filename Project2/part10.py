@@ -160,7 +160,7 @@ def part10():
     validationvar = Variable(torch.from_numpy(validationsaving), requires_grad=False).type(dtype_float)
     trainingvar = Variable(torch.from_numpy(saving), requires_grad=False).type(dtype_float)
 
-    setdivisions = 15
+    setdivisions = 2
     Xlearn = np.zeros(shape = (setdivisions, 1))
     Y1learn = np.zeros(shape = (setdivisions, 1))
     Y2learn = np.zeros(shape = (setdivisions, 1))
@@ -197,28 +197,6 @@ def part10():
         print "validation set: " + str(Y2learn[i-1])
         print "full training set: " + str(Y1learn[i-1])
 
-        #FOR GENERATING ACCURACY w.r.t ITERATIONS
-        #     if t % 40 == 0:
-        #         X[t / 40] = t
-        #         y_pred = model2(testvar).data.numpy()
-        #         Y1[t/40] =  np.mean(np.argmax(y_pred, 1) == np.argmax(testlabels, 1))
-
-        #         y_pred = model2(validationvar).data.numpy()
-        #         Y2[t/40] = np.mean(np.argmax(y_pred, 1) == np.argmax(validationlabels, 1))
-
-        #         y_pred = model2(trainingvar).data.numpy()
-        #         Y3[t/40] = np.mean(np.argmax(y_pred, 1) == np.argmax(traininglabels, 1))
-        # plt.plot(X, Y2,'y', label="Validation Set") 
-        # plt.plot(X, Y1,'g', label="Test Set") 
-        # plt.plot(X, Y3,'r', label="Training Set")
-        # plt.xlabel('iterations')
-        # plt.ylabel('accuracy')
-        # plt.legend(loc='upper left')
-        # fig = plt.gcf()
-        # fig.savefig('part8fig.png')
-        # plt.show()
-
-
     plt.plot(Xlearn, Y1learn, 'y', label="training set")
     plt.plot(Xlearn, Y2learn, "g", label ="validation set")
     plt.xlabel("training set size")
@@ -230,6 +208,52 @@ def part10():
 
     y_pred = model2(testvar).data.numpy()
     print "FINAL TEST SET ACCURACY: " + str(np.mean(np.argmax(y_pred, 1) == np.argmax(testlabels, 1)))
+
+    "generating iterations curve"
+    #generate accuracy vs iterations---------------------------------------------------------
+    y_classes = Variable(torch.from_numpy(np.argmax(traininglabels, 1)), requires_grad=False).type(dtype_long)
+
+    X = np.zeros(shape=(100,1))
+    Y1 = np.zeros(shape=(100,1))
+    Y2 = np.zeros(shape=(100,1))
+    Y3 = np.zeros(shape=(100,1))
+
+    model2 = torch.nn.Sequential(
+            torch.nn.Linear(dim_x, dim_h),
+            torch.nn.ReLU(),
+            torch.nn.Linear(dim_h, dim_out),
+    )
+    
+    optimizer = torch.optim.Adam(model2.parameters(), lr=learning_rate)
+
+    for t in range(500):
+        y_pred = model2(trainingvar)
+        loss = loss_fn(y_pred, y_classes)
+        
+        model2.zero_grad()  # Zero out the previous gradient computation
+        loss.backward()    # Compute the gradient
+        optimizer.step()   # Use the gradient information to step
+
+        #FOR GENERATING ACCURACY w.r.t ITERATIONS
+        if t % 5 == 0:
+            X[t / 5] = t
+            y_pred = model2(testvar).data.numpy()
+            Y1[t/5] =  np.mean(np.argmax(y_pred, 1) == np.argmax(testlabels, 1))
+
+            y_pred = model2(validationvar).data.numpy()
+            Y2[t/5] = np.mean(np.argmax(y_pred, 1) == np.argmax(validationlabels, 1))
+
+            y_pred = model2(trainingvar).data.numpy()
+            Y3[t/5] = np.mean(np.argmax(y_pred, 1) == np.argmax(traininglabels, 1))
+    plt.plot(X, Y2,'y', label="Validation Set") 
+    plt.plot(X, Y1,'g', label="Test Set") 
+    plt.plot(X, Y3,'r', label="Training Set")
+    plt.xlabel('iterations')
+    plt.ylabel('accuracy')
+    plt.legend(loc='upper left')
+    fig = plt.gcf()
+    fig.savefig('part10figiterations.png')
+    plt.show()
 
 
     

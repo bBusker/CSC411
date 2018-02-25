@@ -16,5 +16,5 @@ import part10
 # part4.part4(0.00001, 5000, True)
 # part5.part5(0.00001, 5000, True)
 # part6.part6()
-part89.part89()
-# part10.part10()
+# part89.part89()
+part10.part10()
