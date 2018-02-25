@@ -1,38 +1,12 @@
 import part2
 import part3
+import part4
 from scipy.io import loadmat
 from pylab import *
 import matplotlib.pyplot as plt
 import numpy as np
 from constants import *
 import cPickle as pickle
-
-# def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=True):
-#     print("------------------------- Starting Grad Descent -------------------------")
-#     EPS = 1e-5  # EPS = 10**(-5)
-#     prev_t = init_W - 10 * EPS
-#     prev_grad = 0
-#     W = init_W.copy()
-#     V = np.zeros(shape = W.shape)
-#     max_iter = _max_iter
-#     iter = 0
-#
-#     while iter < max_iter: #and norm(t - prev_t) > EPS:
-#         prev_t = W.copy()
-#         b = np.zeros(shape=(K_NUM,1))
-#         grad = df(x, y, W, b)
-#         V = momentum * V + alpha * grad
-#         # W -= alpha * grad
-#         W -= V
-#         if iter % 100 == 0 and printing:
-#             print("Iter %i: cost = %.5f" % (iter,  f(x, W, b, y)))
-#         elif iter % 50000 == 0:
-#             print("Training...")
-#         iter += 1
-#         prev_grad = grad
-#
-#     print("Done!")
-#     return W
 
 def grad_descent(f, df, x, y, init_W, alpha_w, alpha_b, _max_iter, momentum = 0, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
@@ -62,34 +36,6 @@ def grad_descent(f, df, x, y, init_W, alpha_w, alpha_b, _max_iter, momentum = 0,
     return W, b
 
 
-def generate_sets(database, size):
-    train_set = np.zeros((size, N_NUM))
-    sol_set = np.zeros((size, 10))
-
-    for i in range(size):
-        rand_dgt = np.random.random_integers(0,9)
-        train_set[i] = database["train"+str(rand_dgt)][i] / 255.0
-        sol_set [i][rand_dgt] = 1
-
-    return train_set.T, sol_set.T
-
-def alt_gen_set(database, scale):
-    x = np.zeros(shape = (N_NUM, M_TRAIN))
-    y = np.zeros(shape = (K_NUM, M_TRAIN))
-
-    count = 0
-    #Load our example
-    for i in range(10):
-        currSet = database["train" + str(i)].T / 255.0
-        x[:, count: count + currSet.shape[1]] = currSet      
-        y[i, count: count + currSet.shape[1]] = 1
-        count += currSet.shape[1] 
-
-    x = x[:, 0:M_TRAIN / scale]
-    y = y[:, 0:M_TRAIN / scale]
-
-    return x,y
-
 def test(database, size, W, b):
     test_set = []
     correct = 0
@@ -103,19 +49,50 @@ def test(database, size, W, b):
 
     return correct/size
 
+def test2(database, solutions, W, b):
+    correct = 0
+    database = database.T
+    solutions = solutions.T
+
+    for i in range(len(database)):
+        guess = part2.forward(database[i], W, b)
+        if np.argmax(guess) == np.argmax(solutions[i]):
+            correct += 1
+
+    return correct/float(len(database))
+
 
 def part5(alpha_w, alpha_b, _max_iter, printing):
     M = loadmat("mnist_all.mat")
 
-    results = []
+    results_val = []
+    results_train = []
+    results_test = []
     x = []
+    train_set, train_set_sol, val_set, val_set_sol, test_set, test_set_sol = part4.generate_sets(M, 5000)
+    W_init = np.random.rand(784, 10)
 
-    # TODO: bias
-    # for i in range(0, M_TRAIN, 100):
-    W = np.zeros((784, 10))
-    # train_set, sol_set = generate_sets(M, 1000)
-    train_set, sol_set = alt_gen_set(M, 1)
-    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha_w, alpha_b, _max_iter, 0.95, printing)
-    pickle.dump( W, open( "part5W.p", "wb" ) )
-    # results += [test(M, 20, W, np.zeros((10)))]
-    # x += [0]
+    step = 20
+    for i in range(step, _max_iter, step):
+        print(i)
+        W, b = grad_descent(part3.f, part3.df, train_set, train_set_sol, W_init, alpha_w, alpha_b, i, 0.9, True)
+
+        y_pred = part2.forward(val_set, W, b)
+        results_val += [np.mean(np.argmax(y_pred, 0) == np.argmax(val_set_sol, 0))]
+        y_pred = part2.forward(train_set, W, b)
+        results_train += [np.mean(np.argmax(y_pred, 0) == np.argmax(train_set_sol, 0))]
+        y_pred = part2.forward(test_set, W, b)
+        results_test += [np.mean(np.argmax(y_pred, 0) == np.argmax(test_set_sol, 0))]
+        print results_test 
+        print results_train
+        print results_val
+        x += [i]
+
+    pickle.dump(W, open("part4W_shichen.p", "wb"))
+    plt.plot(x, results_val,'y',label="validation set")
+    plt.plot(x, results_train,'g',label="training set")
+    plt.plot(x, results_test,'r',label="test set")
+    plt.title("Part 5 Learning Curve")
+    plt.ylabel("accuracy")
+    plt.xlabel("iterations")
+    plt.show()

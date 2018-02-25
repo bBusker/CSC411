@@ -34,15 +34,12 @@ def grad_descent(f, df, x, y, init_W, alpha_w, alpha_b, _max_iter, printing=True
 
 
 def generate_sets(database, size):
-    train_set = np.zeros((size, N_NUM))
-    sol_set = np.zeros((size, 10))
-
-    for i in range(size):
-        rand_dgt = np.random.random_integers(0,9)
-        train_set[i] = database["train"+str(rand_dgt)][i] / 255.0
-        sol_set [i][rand_dgt] = 1
-
-    return train_set.T, sol_set.T
+    np.random.seed(1)
+    print "genset"
+    x, y = alt_gen_set(database, 1)
+    train_idx = np.random.permutation(range(x.shape[1]))[:size + 2000] #480 for currently using all images
+    print"------------------------------------------------------------------------------------------------------"
+    return x[:, train_idx[:size]], y[:, train_idx[:size]], x[:, train_idx[size:size+1000]], y[:, train_idx[size:size+1000]], x[:, train_idx[size+1000:size+2000]], y[:, train_idx[size+1000:size+2000]]
 
 def alt_gen_set(database, scale):
     x = np.zeros(shape = (N_NUM, M_TRAIN))
@@ -74,25 +71,50 @@ def test(database, size, W, b):
 
     return correct/float(size)
 
+def test2(database, solutions, W, b):
+    correct = 0
+    database = database.T
+    solutions = solutions.T
+
+    for i in range(len(database)):
+        guess = part2.forward(database[i], W, b)
+        if np.argmax(guess) == np.argmax(solutions[i]):
+            correct += 1
+
+    return correct/float(len(database))
+
 
 def part4(alpha_w, alpha_b, _max_iter, printing):
     M = loadmat("mnist_all.mat")
 
-    results = []
+    results_val = []
+    results_train = []
+    results_test = []
     x = []
+    train_set, train_set_sol, val_set, val_set_sol, test_set, test_set_sol = generate_sets(M, 5000)
+    W_init = np.random.rand(784, 10)
 
-    #TODO: bias
-    #for i in range(0, M_TRAIN, 100):
-    W = np.zeros((784, 10))
-    # train_set, sol_set = generate_sets(M, 1000)
-    train_set, sol_set = alt_gen_set(M, 1)
-    W = grad_descent(part3.f, part3.df, train_set, sol_set, W, alpha_w, alpha_b, _max_iter, printing)
-    pickle.dump( W, open( "part4W.p", "wb" ) )
-    #b = np.zeros((10, 1))
-    print(W)
-    print("Testing... {}% correct".format(test(M, 500, W[0], W[1])*100))
-    #results += [test(M, 20, W, np.zeros((10)))]
-    #x += [0]
+    step = 50
+    for i in range(step, _max_iter, step):
+        print(i)
+        W, b = grad_descent(part3.f, part3.df, train_set, train_set_sol, W_init, alpha_w, alpha_b, i, printing)
 
+        y_pred = part2.forward(val_set, W, b)
+        results_val += [np.mean(np.argmax(y_pred, 0) == np.argmax(val_set_sol, 0))]
+        y_pred = part2.forward(train_set, W, b)
+        results_train += [np.mean(np.argmax(y_pred, 0) == np.argmax(train_set_sol, 0))]
+        y_pred = part2.forward(test_set, W, b)
+        results_test += [np.mean(np.argmax(y_pred, 0) == np.argmax(test_set_sol, 0))]
+        print results_test 
+        print results_train
+        print results_val
+        x += [i]
 
-    #plt.plot(results, x)
+    pickle.dump(W, open("part4W_shichen.p", "wb"))
+    plt.plot(x, results_val,'y',label="validation set")
+    plt.plot(x, results_train,'g',label="training set")
+    plt.plot(x, results_test,'r',label="test set")
+    plt.title("Part 4 Learning Curve")
+    plt.ylabel("accuracy")
+    plt.xlabel("iterations")
+    plt.show()
