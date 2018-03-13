@@ -64,15 +64,15 @@ def part3():
     x = x[:, 0:M_TRAIN / scale]
     y = y[:, 0:M_TRAIN / scale]
 
-    h = 0.00001
-    grad = df(x,y, W, b)
+    h = 0.0000001
+    grad, extra = df(x,y, W, b)
     
     print "done calculating gradient"
 
     for i in range(10):
         W_perturbed = W.copy()
         W_perturbed[350 + i,0] = W[350 + i, 0] + h
-        approx_grad = (f(x,W_perturbed,b,y) - f(x,W,b,y))/h
+        approx_grad = (f(x,W_perturbed,b,y) - f(x,W,b,y))*x.shape[1]/h
 
         print "grad: %.3f approximate grad: %.3f" %(grad[350 + i, 0], approx_grad)
     

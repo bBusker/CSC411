@@ -160,7 +160,7 @@ def part10():
     validationvar = Variable(torch.from_numpy(validationsaving), requires_grad=False).type(dtype_float)
     trainingvar = Variable(torch.from_numpy(saving), requires_grad=False).type(dtype_float)
 
-    setdivisions = 2
+    setdivisions = 100
     Xlearn = np.zeros(shape = (setdivisions, 1))
     Y1learn = np.zeros(shape = (setdivisions, 1))
     Y2learn = np.zeros(shape = (setdivisions, 1))

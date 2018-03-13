@@ -90,7 +90,7 @@ def part89():
     validationvar = Variable(torch.from_numpy(validationset), requires_grad=False).type(dtype_float)
     trainingvar = Variable(torch.from_numpy(trainingset), requires_grad=False).type(dtype_float)
     
-    setdivisions = 3
+    setdivisions = 100
     Xlearn = np.zeros(shape = (setdivisions, 1))
     Y1learn = np.zeros(shape = (setdivisions, 1))
     Y2learn = np.zeros(shape = (setdivisions, 1))
