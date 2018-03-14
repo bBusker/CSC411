@@ -40,25 +40,6 @@ def generate_sets(database, size):
     train_idx = np.random.permutation(range(x.shape[1]))[:size + 2000] #480 for currently using all images
     print"------------------------------------------------------------------------------------------------------"
     return x[:, train_idx[:size]], y[:, train_idx[:size]], x[:, train_idx[size:size+1000]], y[:, train_idx[size:size+1000]], x[:, train_idx[size+1000:size+2000]], y[:, train_idx[size+1000:size+2000]]
-    # # train_set = np.zeros((size, N_NUM))
-    # # val_set = np.zeros((6000, N_NUM))
-    # # train_set_sol = np.zeros((size, K_NUM))
-    # # val_set_sol = np.zeros((6000, K_NUM))
-    # # count = np.zeros((10,1))
-
-    # # for i in range(6000):
-    # #     rand_dgt = np.random.random_integers(0,9)
-    # #     val_set[i] = database["train"+str(rand_dgt)][int(count[rand_dgt][0])] / 255.0
-    # #     val_set_sol[i][rand_dgt] = 1
-    # #     count[rand_dgt] += 1
-
-    # # for i in range(size):
-    # #     rand_dgt = np.random.random_integers(0,9)
-    # #     train_set[i] = database["train"+str(rand_dgt)][int(count[rand_dgt][0])] / 255.0
-    # #     train_set_sol[i][rand_dgt] = 1
-    # #     count[rand_dgt] += 1
-
-    # return train_set.T, train_set_sol.T, val_set.T, val_set_sol.T
 
 def alt_gen_set(database, scale):
     x = np.zeros(shape = (N_NUM, M_TRAIN))

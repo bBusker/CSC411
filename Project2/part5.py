@@ -8,33 +8,6 @@ import numpy as np
 from constants import *
 import cPickle as pickle
 
-# def grad_descent(f, df, x, y, init_W, alpha, _max_iter, momentum=0, printing=True):
-#     print("------------------------- Starting Grad Descent -------------------------")
-#     EPS = 1e-5  # EPS = 10**(-5)
-#     prev_t = init_W - 10 * EPS
-#     prev_grad = 0
-#     W = init_W.copy()
-#     V = np.zeros(shape = W.shape)
-#     max_iter = _max_iter
-#     iter = 0
-#
-#     while iter < max_iter: #and norm(t - prev_t) > EPS:
-#         prev_t = W.copy()
-#         b = np.zeros(shape=(K_NUM,1))
-#         grad = df(x, y, W, b)
-#         V = momentum * V + alpha * grad
-#         # W -= alpha * grad
-#         W -= V
-#         if iter % 100 == 0 and printing:
-#             print("Iter %i: cost = %.5f" % (iter,  f(x, W, b, y)))
-#         elif iter % 50000 == 0:
-#             print("Training...")
-#         iter += 1
-#         prev_grad = grad
-#
-#     print("Done!")
-#     return W
-
 def grad_descent(f, df, x, y, init_W, alpha_w, alpha_b, _max_iter, momentum = 0, printing=True):
     print("------------------------- Starting Grad Descent -------------------------")
     EPS = 1e-5  # EPS = 10**(-5)
