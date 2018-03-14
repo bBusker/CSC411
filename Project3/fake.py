@@ -1,6 +1,5 @@
 import random
 import nb_trainer
-from math import *
 
 # Open and read headlines from file
 f_real = open("clean_real.txt")
@@ -11,7 +10,7 @@ fakes = [str.split(line) for line in f_fake]
 
 
 # Randomize and generate training, validation, test sets
-# random.seed(0)
+random.seed(66)
 random.shuffle(reals)
 random.shuffle(fakes)
 
@@ -26,12 +25,11 @@ p_fake = len(fakes)/float(len(reals)+len(fakes))
 
 
 # Testing
-correct = 0
-print("testing on fake training set")
-for i in range(len(sets_fakes["test"])):
-    prediction = nb_trainer.nb_predictor(sets_fakes["test"][i], priors_reals, priors_fakes, p_fake)
-    if prediction >= 0.5:
-        correct += 1
-    if prediction >= 1:
-        print("INVALID PREDICTION: {}".format(prediction))
-print("correct: {}".format(float(correct)/len(sets_fakes["test"])))
+nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "test")
+nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "val")
+nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "train")
+
+
+def tempprinter(str):
+    print("real: {}".format(priors_reals[str]/float(len(reals))))
+    print("fake: {}".format(priors_fakes[str]/float(len(fakes))))

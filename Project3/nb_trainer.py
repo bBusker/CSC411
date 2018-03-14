@@ -1,6 +1,8 @@
 from math import *
 
 def generate_priors(sets_reals, sets_fakes, set_choice):
+    # Generates trained sets for our prior prediction
+
     priors_reals = {"count_total": 0}
     for headline in sets_reals[set_choice]:
         for word in headline:
@@ -22,17 +24,17 @@ def generate_priors(sets_reals, sets_fakes, set_choice):
     return priors_reals, priors_fakes
 
 
-def nb_predictor(headline, priors_reals, priors_fakes, p_fake):
-    #Returns probability of the headline being fake news
-    #p(y|x) = p(x|y)*p(y)/(p(x|y)*p(y) + p(x|~y)*p(~y))
+def predictor(headline, priors_reals, priors_fakes, p_fake):
+    # Returns probability of the headline being fake news
+    # p(y|x) = p(x|y)*p(y)/(p(x|y)*p(y) + p(x|~y)*p(~y))
 
     m = 2 # Virtual Examples
-    p_hat = 0.5 # Virtual Example Prior
+    p_hat = 0.6 # Virtual Example Prior (of being fake)
 
     p_x_given_real = 0
     p_x_given_fake = 0
 
-    reals_total = priors_reals["count_total"] #TODO: totals counting
+    reals_total = priors_reals["count_total"]
     fakes_total = priors_fakes["count_total"]
 
     for word in headline:
@@ -52,3 +54,27 @@ def nb_predictor(headline, priors_reals, priors_fakes, p_fake):
     p_yx = exp(p_x_given_fake) * p_fake / (exp(p_x_given_fake) * p_fake + exp(p_x_given_real) * (1-p_fake))
 
     return p_yx
+
+
+def tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, testing_set):
+    # Tests the naive bayes algorithm on the specified sets using the input priors
+
+    correct = 0
+
+    print("Testing Naive Bayes Classifier on {} Set ".format(testing_set.title()))
+
+    for i in range(len(sets_reals[testing_set])):
+        prediction = predictor(sets_reals[testing_set][i], priors_reals, priors_fakes, p_fake)
+        if prediction < 0.5:
+            correct += 1
+        if prediction >= 1 or prediction < 0:
+            print("INVALID PREDICTION: {}".format(prediction))
+
+    for i in range(len(sets_fakes[testing_set])):
+        prediction = predictor(sets_fakes[testing_set][i], priors_reals, priors_fakes, p_fake)
+        if prediction >= 0.5:
+            correct += 1
+        if prediction >= 1 or prediction < 0:
+            print("INVALID PREDICTION: {}".format(prediction))
+
+    print("--Correct: {:.7f}%".format(float(correct)/len(sets_fakes[testing_set] + sets_reals[testing_set])*100))
