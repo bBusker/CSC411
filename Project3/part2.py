@@ -80,7 +80,8 @@ learningCurve = np.zeros(shape = (divisions, 3))
 xdim = np.zeros(shape = (divisions))
 
 
-learning_rate = 8e-6
+learning_rate = 8
+e-6
 reg_lambda = 0.03
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_lambda)
 print("---------- training linear regression model with Adam ----------")
