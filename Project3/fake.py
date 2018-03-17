@@ -10,7 +10,7 @@ fakes = [str.split(line) for line in f_fake]
 
 
 # Randomize and generate training, validation, test sets
-random.seed(66)
+random.seed(0)
 random.shuffle(reals)
 random.shuffle(fakes)
 

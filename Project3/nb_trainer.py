@@ -48,8 +48,22 @@ def predictor(headline, priors_reals, priors_fakes, p_fake):
         except:
             c_fake = 0
 
-        p_x_given_real += log(c_real + m*p_hat) - log(reals_total + m)
+        p_x_given_real += log(c_real + m*(1-p_hat)) - log(reals_total + m)
         p_x_given_fake += log(c_fake + m*p_hat) - log(fakes_total + m)
+
+
+    for word in priors_reals:
+        if word in headline:
+            continue
+        else:
+            p_x_given_real += log((reals_total + m) - (priors_reals[word] + m*(1-p_hat))) - log(reals_total + m)
+
+    for word in priors_fakes:
+        if word in headline:
+            continue
+        else:
+            p_x_given_fake += log((fakes_total + m) - (priors_fakes[word] + m * p_hat)) - log(fakes_total + m)
+
 
     p_yx = exp(p_x_given_fake) * p_fake / (exp(p_x_given_fake) * p_fake + exp(p_x_given_real) * (1-p_fake))
 
@@ -67,14 +81,14 @@ def tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, testing_s
         prediction = predictor(sets_reals[testing_set][i], priors_reals, priors_fakes, p_fake)
         if prediction < 0.5:
             correct += 1
-        if prediction >= 1 or prediction < 0:
+        if prediction > 1 or prediction < 0:
             print("INVALID PREDICTION: {}".format(prediction))
 
     for i in range(len(sets_fakes[testing_set])):
         prediction = predictor(sets_fakes[testing_set][i], priors_reals, priors_fakes, p_fake)
         if prediction >= 0.5:
             correct += 1
-        if prediction >= 1 or prediction < 0:
+        if prediction > 1 or prediction < 0:
             print("INVALID PREDICTION: {}".format(prediction))
 
     print("--Correct: {:.7f}%".format(float(correct)/len(sets_fakes[testing_set] + sets_reals[testing_set])*100))
