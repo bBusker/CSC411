@@ -13,8 +13,6 @@ class sets:
     validation = 1
     test = 2
 
-enumerate
-
 np.random.seed(1)
 torch.manual_seed(0)
 
@@ -73,16 +71,15 @@ model = torch.nn.Sequential(
     torch.nn.Sigmoid()
 )
 
-divisions = 50
-iterations = 12000
+divisions = 25
+iterations = 1000
 
 learningCurve = np.zeros(shape = (divisions, 3))
 xdim = np.zeros(shape = (divisions))
 
 
-learning_rate = 8
-e-6
-reg_lambda = 0.03
+learning_rate = 8e-5
+reg_lambda = 0.04
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_lambda)
 print("---------- training linear regression model with Adam ----------")
 for t in range(iterations):
@@ -121,5 +118,12 @@ plt.legend(loc='best')
 fig = plt.gcf()
 fig.savefig('part4learningcurve.png')
 plt.show()
+
+#----------extracting thetas for part6------------
+
+weights = model[0].weight.data.numpy()
+weights.argsort()
+
+print weights
 
 
