@@ -26,9 +26,11 @@ validation_examples = sets_fakes[sets.validation] + sets_reals[sets.validation]
 test_examples = sets_fakes[sets.test] + sets_reals[sets.test]
 
 all_words = {} #generate list of all our words present
+word_order = {}
 for headline in training_examples + validation_examples + test_examples:
     for word in headline:
         if word not in all_words:
+            word_order[len(all_words)] = word
             all_words[word] = len(all_words)
 
 np_trainingset = np.zeros(shape=(len(training_examples), len(all_words)))
@@ -71,15 +73,15 @@ model = torch.nn.Sequential(
     torch.nn.Sigmoid()
 )
 
-divisions = 25
-iterations = 1000
+divisions = 40
+iterations = 10000
 
 learningCurve = np.zeros(shape = (divisions, 3))
 xdim = np.zeros(shape = (divisions))
 
 
-learning_rate = 8e-5
-reg_lambda = 0.04
+learning_rate = 8e-4
+reg_lambda = 0.021
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_lambda)
 print("---------- training linear regression model with Adam ----------")
 for t in range(iterations):
@@ -114,16 +116,78 @@ for t in range(iterations):
 plt.plot(xdim, learningCurve[:,0], 'b', label="Training Curve")
 plt.plot(xdim, learningCurve[:,1], 'r', label="Validation Set")
 plt.plot(xdim, learningCurve[:,2], 'g', label="Test Set")
+plt.xlabel("Iterations")
+plt.xlabel("Accuracy (%)")
 plt.legend(loc='best')
 fig = plt.gcf()
 fig.savefig('part4learningcurve.png')
-plt.show()
+# plt.show()
 
 #----------extracting thetas for part6------------
 
-weights = model[0].weight.data.numpy()
-weights.argsort()
+weights = model[0].weight.data.numpy()[0]
 
-print weights
+real_indices = []
+fake_indices = []
 
+for i in range(100):
+    fake_indices.append(np.argmax(weights))
+    weights[np.argmax(weights)]= 0
+
+weights = model[0].weight.data.numpy()[0]
+for i in range(100):
+    real_indices.append(np.argmin(weights))
+    weights[np.argmin(weights)] = 0
+
+print "----------EXTRACTED WORDS----------"
+print "----------fakewords------------"
+
+count = 0
+# print all_words.keys()
+for index in fake_indices:
+    if count == 10:
+        break
+
+    print word_order[index]
+    count += 1
+
+print "----------realwords----------"
+
+count = 0
+for index in real_indices:
+    if count == 10:
+        break
+
+    print word_order[index]
+    count += 1
+
+#----------extracting thetas for part6 NO STOPWORDS------------
+print "---------NO STOPWORDS----------"
+print "----------fakewords------------"
+
+count = 0
+# print all_words.keys()
+for index in fake_indices:
+    if count == 10:
+        break
+    
+    if word_order[index] in util.ENGLISH_STOP_WORDS:
+        continue
+
+    print word_order[index]
+    count += 1
+
+print "----------realwords----------"
+
+count = 0
+for index in real_indices:
+    if count == 10:
+        break
+    
+    if word_order[index] in util.ENGLISH_STOP_WORDS:
+        continue
+
+    print word_order[index]
+    count += 1
+ 
 
