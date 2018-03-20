@@ -3,7 +3,7 @@ from math import *
 import util
 import graphviz
 
-#import torch
+# import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -16,7 +16,7 @@ class sets:
     test = 2
 
 np.random.seed(0)
-torch.manual_seed(0)
+# torch.manual_seed(0)
 
 fakes, reals = util.generate_sets()
 
@@ -87,7 +87,7 @@ plt.ylabel("Accuracy (%)")
 plt.legend(loc='best')
 fig = plt.gcf()
 fig.savefig('part7learningcurve.png')
-# plt.show()
+plt.show()
 
 
 #-taking best tree

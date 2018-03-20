@@ -121,7 +121,7 @@ plt.xlabel("Accuracy (%)")
 plt.legend(loc='best')
 fig = plt.gcf()
 fig.savefig('part4learningcurve.png')
-# plt.show()
+plt.show()
 
 #----------extracting thetas for part6------------
 

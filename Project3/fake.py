@@ -75,3 +75,7 @@ print("")
 print("best predictors for fake headline if absent(no stop words)")
 for i in range(len(fake_notpresent)):
     print("{}&{}&{:.2f}".format(i+1, fake_notpresent[i][0], fake_notpresent[i][1]))
+
+import lr_trainer
+import dt_trainer_alex
+import part8
