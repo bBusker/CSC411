@@ -32,6 +32,7 @@ nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "t
 nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "val")
 nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "train")
 
+# Best Words Printouts
 real_present, fake_present, real_notpresent, fake_notpresent = nb_trainer.highest_probs(priors_reals, priors_fakes, p_fake)
 print("")
 print("best predictors for real headline if present")
@@ -74,6 +75,3 @@ print("")
 print("best predictors for fake headline if absent(no stop words)")
 for i in range(len(fake_notpresent)):
     print("{}&{}&{:.2f}".format(i+1, fake_notpresent[i][0], fake_notpresent[i][1]))
-
-
-print ("end")
