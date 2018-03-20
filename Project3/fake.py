@@ -28,9 +28,9 @@ p_fake = len(fakes)/float(len(reals)+len(fakes))
 
 
 # Testing
-# nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "test")
-# nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "val")
-# nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "train")
+nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "test")
+nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "val")
+nb_trainer.tester(sets_reals, sets_fakes, priors_reals, priors_fakes, p_fake, "train")
 
 real_present, fake_present, real_notpresent, fake_notpresent = nb_trainer.highest_probs(priors_reals, priors_fakes, p_fake)
 print("")
@@ -58,17 +58,22 @@ real_present, fake_present, real_notpresent, fake_notpresent = nb_trainer.highes
 print("")
 print("best predictors for real headline if present (no stop words)")
 for i in range(len(real_present)):
-    print("{}: {}, {}".format(i, real_present[i][0], real_present[i][1]))
+    print("{}&{}&{:.2f}".format(i+1, real_present[i][0], real_present[i][1]))
 
 print("")
 print("best predictors for fake headline if present(no stop words)")
 for i in range(len(fake_present)):
-    print("{}: {}, {}".format(i, fake_present[i][0], fake_present[i][1]))
+    print("{}&{}&{:.2f}".format(i+1, fake_present[i][0], fake_present[i][1]))
 
+print("")
+print("best predictors for real headline if absent(no stop words")
+for i in range(len(real_notpresent)):
+    print("{}&{}&{:.2f}".format(i+1, real_notpresent[i][0], real_notpresent[i][1]))
 
-# tree1 = dt_trainer.generate_tree([[1,1,1],[0,0,0]],[1,0])
-
-# tree = dt_trainer.generate_tree(sets_reals["train"] + sets_fakes["train"], [0]*len(sets_reals["train"]) + [1]*len(sets_fakes["train"]))
+print("")
+print("best predictors for fake headline if absent(no stop words)")
+for i in range(len(fake_notpresent)):
+    print("{}&{}&{:.2f}".format(i+1, fake_notpresent[i][0], fake_notpresent[i][1]))
 
 
 print ("end")
