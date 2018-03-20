@@ -14,7 +14,7 @@ class sets:
     validation = 1
     test = 2
 
-np.random.seed(1)
+np.random.seed(0)
 torch.manual_seed(0)
 
 fakes, reals = util.generate_sets()
@@ -69,14 +69,10 @@ for index, headline in enumerate(test_examples):
 X = np.zeros(10)
 Y = np.zeros(shape = (10, 3))
 
-print np_trainingset 
-print np_traininglabels
-
 for index, i in enumerate([2,5,10,20,30,40,50,75,100,200]):
     clf = tree.DecisionTreeClassifier(max_depth = i)
     clf = clf.fit(np_trainingset, np_traininglabels)
-
-
+    
     X[index] = i
     Y[index, 0] = clf.score(np_trainingset, np_traininglabels)
     Y[index, 1] = clf.score(np_validationset, np_validationlabels)
@@ -86,7 +82,7 @@ plt.plot(X, Y[:,0], 'b', label="Training Curve")
 plt.plot(X, Y[:,1], 'r', label="Validation Set")
 plt.plot(X, Y[:,2], 'g', label="Test Set")
 plt.xlabel("Depth")
-plt.xlabel("Accuracy (%)")
+plt.ylabel("Accuracy (%)")
 plt.legend(loc='best')
 fig = plt.gcf()
 fig.savefig('part7learningcurve.png')
@@ -100,3 +96,6 @@ clf = clf.fit(np_trainingset, np_traininglabels)
 dotfile = open("tree.dot", 'w')
 tree.export_graphviz(clf, out_file = dotfile, max_depth = 2)
 dotfile.close()
+
+for index in [125, 12, 1185, 92, 501, 255]:
+    print "index=" + str(index) + " word: " + word_order[index]

@@ -13,7 +13,7 @@ class sets:
     validation = 1
     test = 2
 
-np.random.seed(1)
+np.random.seed(0)
 torch.manual_seed(0)
 
 fakes, reals = util.generate_sets()
@@ -73,15 +73,15 @@ model = torch.nn.Sequential(
     torch.nn.Sigmoid()
 )
 
-divisions = 40
+divisions = 50
 iterations = 10000
 
 learningCurve = np.zeros(shape = (divisions, 3))
 xdim = np.zeros(shape = (divisions))
 
 
-learning_rate = 8e-4
-reg_lambda = 0.021
+learning_rate = 8e-6
+reg_lambda = 0.03
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_lambda)
 print("---------- training linear regression model with Adam ----------")
 for t in range(iterations):
@@ -131,12 +131,12 @@ real_indices = []
 fake_indices = []
 
 for i in range(100):
-    fake_indices.append(np.argmax(weights))
+    real_indices.append((np.max(weights),np.argmax(weights)))
     weights[np.argmax(weights)]= 0
 
 weights = model[0].weight.data.numpy()[0]
 for i in range(100):
-    real_indices.append(np.argmin(weights))
+    fake_indices.append((np.min(weights), np.argmin(weights)))
     weights[np.argmin(weights)] = 0
 
 print "----------EXTRACTED WORDS----------"
@@ -148,7 +148,7 @@ for index in fake_indices:
     if count == 10:
         break
 
-    print word_order[index]
+    print str(index[0]) + " "+ word_order[index[1]]
     count += 1
 
 print "----------realwords----------"
@@ -158,7 +158,7 @@ for index in real_indices:
     if count == 10:
         break
 
-    print word_order[index]
+    print str(index[0]) + " "+ word_order[index[1]]
     count += 1
 
 #----------extracting thetas for part6 NO STOPWORDS------------
@@ -171,10 +171,10 @@ for index in fake_indices:
     if count == 10:
         break
     
-    if word_order[index] in util.ENGLISH_STOP_WORDS:
+    if word_order[index[1]] in util.ENGLISH_STOP_WORDS:
         continue
 
-    print word_order[index]
+    print str(index[0]) + " "+ word_order[index[1]]
     count += 1
 
 print "----------realwords----------"
@@ -184,10 +184,10 @@ for index in real_indices:
     if count == 10:
         break
     
-    if word_order[index] in util.ENGLISH_STOP_WORDS:
+    if word_order[index[1]] in util.ENGLISH_STOP_WORDS:
         continue
 
-    print word_order[index]
+    print str(index[0]) + " "+ word_order[index[1]]
     count += 1
  
 
