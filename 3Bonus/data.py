@@ -3,9 +3,10 @@ import sys
 import re
 
 def clean(title):
-    title = title.replace('"', "")
-    title = title.replace("'", "")
-    title = re.sub('[^a-zA-Z \n \' \"]', ' ', title)
+    # title = title.replace('"', "")
+    # title = title.replace("'", "")
+    title = re.sub('[\'\"\.]', "", title)
+    title = re.sub('[^a-zA-Z \n \' \ \."]', ' ', title)
     title = title.lower()
     title = re.sub(' +',' ',title)
     return title
