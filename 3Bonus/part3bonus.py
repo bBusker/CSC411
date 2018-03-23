@@ -1,3 +1,5 @@
 import data
 
-data.generateHeadlines()
+temp = data.generateHeadlines()
+
+print('end')

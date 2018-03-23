@@ -1,11 +1,12 @@
 import random
 import numpy as np
 import nb_trainer
-import dt_trainer
+# import dt_trainer
+
 
 # Open and read headlines from file
-f_real = open("clean_real.txt")
-f_fake = open("clean_fake.txt")
+f_real = open("Data/clean_real.txt")
+f_fake = open("Data/clean_fake.txt")
 
 reals = [str.split(line) for line in f_real]
 fakes = [str.split(line) for line in f_fake]

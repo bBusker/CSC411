@@ -26,4 +26,4 @@ def generateHeadlines():
                 title = clean(row[titleLocation])
                 if title not in ["", " "]:
                     fakeHeadlines.append(title)
-    print(fakeHeadlines[0:100])
+    return(fakeHeadlines[0:100])
