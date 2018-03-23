@@ -16,7 +16,7 @@ def generateHeadlines():
     fakeHeadlines = []
 
     """----load kaggle fakes---"""
-    with open('fake.csv', mode='r') as infile:
+    with open('Data/fake_kaggle.csv', mode='r') as infile:
         csv.field_size_limit(sys.maxsize)
         reader = csv.reader(infile)
         titleLocation = 4
