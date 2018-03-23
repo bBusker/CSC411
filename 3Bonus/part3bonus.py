@@ -1,3 +1,3 @@
 import data
 
-data.loadHeadlines()
+data.generateHeadlines()
