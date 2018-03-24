@@ -76,4 +76,12 @@ def prep_data(fake_headlines, real_headlines):
                          vectors="glove.6B.50d"
     )
 
-    return train, val, test
+    vocab = sentence.vocab
+
+    embedding = torch.nn.Embedding(
+        num_embeddings=len(vocab),
+        embedding_dim=50, #TODO: change depending on final used word2vec
+    )
+
+    return train, val, test, embedding
+

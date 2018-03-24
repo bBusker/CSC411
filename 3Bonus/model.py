@@ -15,9 +15,9 @@ class CNN_Text(nn.Module):
         self.layers = nn.Sequential(
             nn.Conv2d(1, output_channels, kernel_size=(embedding_length, kernel_width), stride=1, padding=2),
             nn.ReLU(inplace=True),
-            nn.Dropout(p = 0.1, True)
-            nn.Linear(output_channels * example_length - kernel_width + 1, 1)
-            nn.ReLU(inplace = True)
+            nn.Dropout(p=0.1, inplace=True),
+            nn.Linear(output_channels * example_length - kernel_width + 1, 1),
+            nn.ReLU(inplace = True),
         )
 
     def forward(self, x):
