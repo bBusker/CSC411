@@ -1,12 +1,15 @@
 import random
 from math import *
-import util 
+import util
+import os
 
 from torch.autograd import Variable
+from torchtext import data
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-import os
+import data_processor
+import model
 
 def train():
     loss_fn = torch.nn.BCELoss()
@@ -26,45 +29,51 @@ def train():
         loss.backward()    # Compute the gradient
         optimizer.step()   # Use the gradient information to 
                             # make a step
-# import data_processor
-# import numpy
-# from torchtext import data
-# import torch
-
-# templist = [["sample", "headline", "one"], ["sample", "headline", "two"]]
 
 
-# def prep_data():
-#     sentence = data.Field(
-#         sequential=True,
-#         fix_length=20,
-#         tokenize=data_processor.clean,
-#         pad_first=True,
-#         tensor_type=torch.LongTensor,
-#         lower=True
-#     )
+def prep_data(fake_headlines, real_headlines):
 
-#     label = data.Field(
-#         sequential=False,
-#         use_vocab=False,
-#         tensor_type=torch.ByteTensor
-#     )
+    split_ratio = 0.15
 
-#     fields = [('sentence_text', sentence), ('label', label)]
+    sentence = data.Field(
+        sequential=True,
+        fix_length=20,
+        tokenize=data_processor.clean,
+        pad_first=True,
+        tensor_type=torch.LongTensor,
+        lower=True
+    )
 
-#     headlines = []
-#     for temp in templist:
-#         headline = data.Example.fromlist((temp, 1), fields)
-#         headlines.append(headline)
+    label = data.Field(
+        sequential=False,
+        use_vocab=False,
+        tensor_type=torch.ByteTensor
+    )
 
-#     train = data.Dataset(headlines, fields)
-#     val = data.Dataset(headlines, fields)
-#     test = data.Dataset(headlines, fields)
+    fields = [('sentence_text', sentence), ('label', label)]
 
-#     sentence.build_vocab(train, val, test,
-#                          max_size=100,
-#                          min_freq=1,
-#                          vectors="glove.6B.50d"
-#     )
+    examples = []
 
-#     return train, val, test
+    headlines = fake_headlines + real_headlines
+    labels = [0]*len(fake_headlines) + [1]*len(real_headlines)
+
+    for item in zip(headlines, labels):
+        example = data.Example.fromlist(item, fields)
+        examples.append(example)
+
+    random.shuffle(examples)
+
+    test_split = int(len(examples)*split_ratio)
+    val_split = int(len(examples)*split_ratio)+test_split
+
+    train = data.Dataset(examples[val_split:], fields)
+    val = data.Dataset(examples[test_split:val_split], fields)
+    test = data.Dataset(examples[:test_split], fields)
+
+    sentence.build_vocab(train, val, test,
+                         max_size=100,
+                         min_freq=1,
+                         vectors="glove.6B.50d"
+    )
+
+    return train, val, test
