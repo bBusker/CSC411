@@ -1,3 +1,6 @@
-import data
+import data_processor
+import classifier
 
-data.generateHeadlines()
+temp = classifier.prep_data()
+
+print('end')
