@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 class CNN_Text(nn.Module):
     
-    def __init__(self, example_length, embedding_length, kernel_width, output_channels, embeddings):
+    def __init__(self, example_length, embedding, kernel_width, output_channels):
         super(CNN_Text, self).__init__()
         
         self.embedding_length = embedding_length
