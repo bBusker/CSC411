@@ -62,16 +62,9 @@ def prep_data(fake_headlines, real_headlines):
         example = data.Example.fromlist(item, fields)
         examples.append(example)
 
-    random.shuffle(examples)
+    #random.shuffle(examples)
 
-    test_split = int(len(examples)*split_ratio)
-    val_split = int(len(examples)*split_ratio)+test_split
-
-    train = data.Dataset(examples[val_split:], fields)
-    val = data.Dataset(examples[test_split:val_split], fields)
-    test = data.Dataset(examples[:test_split], fields)
-
-    sentence.build_vocab(train,
+    sentence.build_vocab(data.Dataset(examples, fields),
                          min_freq=3,
                          vectors="glove.6B.50d"
     )
@@ -84,5 +77,23 @@ def prep_data(fake_headlines, real_headlines):
     )
     embedding.weight.data.copy_(vocab.vectors)
 
-    return train, val, test, embedding, vocab.stoi
+    temp = list(zip(headlines, labels))
+    random.shuffle(temp)
+    headlines, labels = zip(*temp)
 
+    test_split = int(len(headlines)*split_ratio)
+    val_split = int(len(headlines)*split_ratio)+test_split
+
+    train = headlines[val_split:]
+    val = headlines[test_split:val_split]
+    test = headlines[:test_split]
+
+    train_labels = labels[val_split:]
+    val_labels = labels[test_split:val_split]
+    test_labels = labels[:test_split]
+
+    train = sentence.process(train, -1, True)
+    val = sentence.process(val, -1, False)
+    test = sentence.process(test, -1, False)
+
+    return train, val, test, train_labels, val_labels, test_labels, embedding, vocab.stoi

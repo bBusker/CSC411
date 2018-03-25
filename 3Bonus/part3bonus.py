@@ -11,7 +11,7 @@ import torch
 fake, real = data_processor.loadHeadlines()
 train, val, test, embedding, vocab = classifier.prep_data(fake, real)
 
-torch_variables, labels = data_processor.convertTorchVar(fake,real, vocab, 20)
+# torch_variables, labels = data_processor.convertTorchVar(fake,real, vocab, 20)
 
 print(torch_variables)
 print(len(labels))
