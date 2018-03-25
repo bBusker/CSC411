@@ -89,8 +89,12 @@ def prep_data(fake_headlines, real_headlines):
     val = headlines[test_split:val_split]
     test = headlines[:test_split]
 
+    train_labels = labels[val_split:]
+    val_labels = labels[test_split:val_split]
+    test_labels = labels[:test_split]
+
     train = sentence.process(train, -1, True)
     val = sentence.process(val, -1, False)
     test = sentence.process(test, -1, False)
 
-    return train, val, test, embedding, vocab.stoi
+    return train, val, test, train_labels, val_labels, test_labels, embedding, vocab.stoi
