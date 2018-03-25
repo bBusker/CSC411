@@ -1,5 +1,6 @@
 import data_processor
 import classifier
+import numpy as np
 
 fake, real = data_processor.loadHeadlines()
 

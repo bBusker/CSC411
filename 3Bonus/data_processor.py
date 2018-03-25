@@ -2,7 +2,6 @@ import csv
 import sys
 import re
 import json
-# import nytimes
 import time
 import requests
 import os
