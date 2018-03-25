@@ -10,24 +10,27 @@ import matplotlib.pyplot as plt
 import data_processor
 import model
 
-def train(model, torch_trainvars, torch_trainlabels, test, testL):
-    iterations = 100
+def train(model, train_vars, train_labels, val_vars, test_labels):
+    iterations = 1000
+
+    model.training=True
 
     loss_fn = torch.nn.BCELoss()
     learning_rate = 1e-3
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 
     for t in range(iterations):
-        prediction = model(torch_trainvars)
-        loss = loss_fn(prediction, torch_trainlabels)
+        prediction = model(train_vars)
+        loss = loss_fn(prediction, train_labels)
 
         model.zero_grad()  # Zero out the previous gradient computation
         loss.backward()    # Compute the gradient
         optimizer.step()   # Use the gradient information to
                             # make a step
-        if t % 5 == 0:
-            print("iter: " + str(t) + " Loss: " + str(loss.data[0]))
-            print(testNN(model, test, testL))
+        if t % 10 == 0:
+            print("iter: {} --------".format(t))
+            print("  loss: {:.4f}".format(loss.data[0]))
+            print("  acc: {:.4f}".format(testNN(model, val_vars, test_labels)))
         
     return model
 
@@ -36,13 +39,13 @@ def testNN(model, test_variables, test_labels):
     return np.mean(np.round(prediction, 0).flatten() == np.asarray(test_labels))
 
 
-def prep_data(fake_headlines, real_headlines):
+def prep_data(fake_headlines, real_headlines, embedding_length):
     random.seed(0)
     split_ratio = 0.15
 
     sentence = data.Field(
         sequential=True,
-        fix_length=20,
+        fix_length=embedding_length,
         tokenize=data_processor.clean,
         pad_first=True,
         tensor_type=torch.LongTensor,
@@ -69,15 +72,15 @@ def prep_data(fake_headlines, real_headlines):
     # random.shuffle(examples)
 
     sentence.build_vocab(data.Dataset(examples, fields),
-                         min_freq=3,
-                         vectors="glove.6B.50d"
+                         min_freq=5,
+                         vectors="glove.6B.100d"
     )
 
     vocab = sentence.vocab
 
     embedding = torch.nn.Embedding(
         num_embeddings=len(vocab),
-        embedding_dim=50, #TODO: change depending on final used word2vec
+        embedding_dim=100, #TODO: change depending on final used word2vec
     )
     embedding.weight.data.copy_(vocab.vectors)
 
