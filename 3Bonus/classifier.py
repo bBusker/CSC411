@@ -86,5 +86,5 @@ def prep_data(fake_headlines, real_headlines):
     )
     embedding.weight.data.copy_(vocab.vectors)
 
-    return train, val, test, embedding
+    return train, val, test, embedding, vocab.stoi
 
