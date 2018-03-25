@@ -85,6 +85,7 @@ def prep_data(fake_headlines, real_headlines):
         num_embeddings=len(vocab),
         embedding_dim=50, #TODO: change depending on final used word2vec
     )
+    embedding.weight.data.copy_(vocab.vectors)
 
     return train, val, test, embedding
 
