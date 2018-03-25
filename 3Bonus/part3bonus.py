@@ -7,15 +7,21 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torchtext import data
 import torch
+import random
+
+np.random.seed(0)
+torch.manual_seed(0)
+random.seed(0)
 
 fake, real = data_processor.loadHeadlines()
-train, val, test, embedding, vocab = classifier.prep_data(fake, real)
+train, val, test, train_labels, val_labels, test_labels, embedding, vocab = classifier.prep_data(fake, real)
 
-# torch_variables, labels = data_processor.convertTorchVar(fake,real, vocab, 20)
+train = train.transpose(0,1)
+test = test.transpose(0,1)
+val = val.transpose(0,1)
+train_labels = Variable(torch.FloatTensor(train_labels))
 
-print(torch_variables)
-print(len(labels))
+model = model.CNN_Text(embedding, 1, 20, 3)
+model = classifier.train(model, train, train_labels, test, test_labels)
 
-# model = model.CNN_Text(embedding, 1, 20, 3)
-
-# print(model.forward(test_var))
+print(classifier.testNN(model, test, test_labels))

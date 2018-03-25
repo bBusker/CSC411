@@ -13,12 +13,15 @@ class CNN_Text(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.dropout = nn.Dropout(p=0.1, inplace=True)
         self.linear1 = nn.Linear(52, 1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.embedding(x)
         x = x.unsqueeze(1)
         x = self.conv1(x)
         x = self.relu(x)
+        x = x.squeeze(2)
         x = x.squeeze(1)
         x = self.linear1(x)
+        x = self.sigmoid(x)
         return x

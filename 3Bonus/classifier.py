@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import data_processor
 import model
 
-def train(model, torch_trainvars, torch_trainlabels):
-    iterations = 10000
+def train(model, torch_trainvars, torch_trainlabels, test, testL):
+    iterations = 100
 
     loss_fn = torch.nn.BCELoss()
-    learning_rate = 8e-2
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=reg_lambda)
+    learning_rate = 1e-3
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.2)
 
     for t in range(iterations):
         prediction = model(torch_trainvars)
@@ -25,15 +25,19 @@ def train(model, torch_trainvars, torch_trainlabels):
         loss.backward()    # Compute the gradient
         optimizer.step()   # Use the gradient information to
                             # make a step
+        if t % 5 == 0:
+            print("iter: " + str(t) + " Loss: " + str(loss.data[0]))
+            print(testNN(model, test, testL))
+        
     return model
 
-# def testNN(model, test_variables, test_labels):
-#     prediction = model(test_variables).data.numpy
-#     return np.mean(np.round(y_pred, 0).flatten() == np_validationlabels)
+def testNN(model, test_variables, test_labels):
+    prediction = model(test_variables).data.numpy()
+    return np.mean(np.round(prediction, 0).flatten() == np.asarray(test_labels))
 
 
 def prep_data(fake_headlines, real_headlines):
-
+    random.seed(0)
     split_ratio = 0.15
 
     sentence = data.Field(
@@ -62,7 +66,7 @@ def prep_data(fake_headlines, real_headlines):
         example = data.Example.fromlist(item, fields)
         examples.append(example)
 
-    #random.shuffle(examples)
+    # random.shuffle(examples)
 
     sentence.build_vocab(data.Dataset(examples, fields),
                          min_freq=3,
