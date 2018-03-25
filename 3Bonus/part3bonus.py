@@ -3,4 +3,6 @@ import classifier
 
 temp = classifier.prep_data()
 
-print('end')
+fake, real = data_processor.loadHeadlines()
+# data_processor.generateVocabulary(fake + real)
+vocabulary = data_processor.loadVocabulary()

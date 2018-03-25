@@ -11,10 +11,12 @@ from os.path import join, exists
 from datetime import date, timedelta
 
 def clean(title):
+    # print(title)
     title = re.sub('[\'\"\.]', "", title)
-    title = re.sub('[^a-zA-Z \n \' \ \."]', ' ', title)
+    title = re.sub('[^a-zA-Z0-9 \n \' \ \."]', ' ', title)
     title = title.lower()
     title = re.sub(' +',' ',title)
+    # print(title)
     return title
 
 def generateHeadlines():
@@ -22,7 +24,7 @@ def generateHeadlines():
     fakeHeadlines = []
 
     """----load kaggle fakes---"""
-    with open('Data/fake_kaggle.csv', mode='r') as infile:
+    with open('fake.csv', mode='r') as infile:
         csv.field_size_limit(sys.maxsize)
         reader = csv.reader(infile)
         titleLocation = 4
@@ -77,7 +79,7 @@ def generateHeadlines():
     start_date = date(2015, 3, 1)
     # start_date = date(2018, 3, 1)
     end_date = date(2018,3, 23)
-    dayrange = range(0, (end_date - start_date).days, 30)
+    dayrange = range(0, (end_date - start_date).days, 24)
     for daycount in dayrange:
         dt = start_date + timedelta(days=daycount)
         datestr = dt.strftime('%Y-%m-%d')
@@ -110,4 +112,35 @@ def generateHeadlines():
 
     for headline in fakeHeadlines:
         fakeFile.write(headline + "\n")
+
+def loadHeadlines():
+    f_fake = open("fakeHeadlines.txt")
+    f_real = open("realHeadlines.txt")
+
+    fakes = [str.split(line) for line in f_fake]
+    reals = [str.split(line) for line in f_real]
+    
+    return fakes, reals
+
+def generateVocabulary(headlines):
+    vocabFile = open("vocabulary.txt", "a")
+
+    vocab = set()
+    for headline in headlines:
+        for word in headline:
+            if word not in vocab:
+                vocab.add(word)
+
+    for word in vocab:
+        vocabFile.write(word + "\n")
+
+def loadVocabulary():
+    vocab = {}
+    vocabFile = open("vocabulary.txt")
+    for word in vocabFile:
+        vocab[word[:-1]] = 0
+    return vocab
+
+    
+
 

@@ -22,3 +22,4 @@ class CNN_Text(nn.Module):
 
     def forward(self, x):
         x = self.layers(x)
+        return x
