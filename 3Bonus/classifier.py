@@ -1,6 +1,5 @@
 import random
 from math import *
-import util
 import os
 
 from torch.autograd import Variable
@@ -29,9 +28,9 @@ def train():
         optimizer.step()   # Use the gradient information to 
                             # make a step
 
-def testNN(model, test_variables, test_labels)
+def testNN(model, test_variables, test_labels):
     prediction = model(test_variables).data.numpy
-    return np.mean(np.round(y_pred, 0).flatten() == np_validationlabels)
+    return np.mean(prediction)
 
 
 def prep_data(fake_headlines, real_headlines):
