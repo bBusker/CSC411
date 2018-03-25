@@ -9,6 +9,9 @@ from os import makedirs
 from os.path import join, exists
 from datetime import date, timedelta
 
+from torch.autograd import Variable
+import torch
+
 def clean(title):
     # print(title)
     title = re.sub('[\'\"\.]', "", title)
@@ -139,7 +142,24 @@ def loadVocabulary():
     for word in vocabFile:
         vocab[word[:-1]] = 0
     return vocab
-
     
+def convertTorchVar(fakeSet, realSet, vocab, length):
+    fake = 0
+    real = 1
 
+    variables = []
+    labels = []
+
+    for headline in fakeSet:
+        temp = [vocab[word] for word in headline] + [0 for i in range(length - len(headline))]
+        variables.append(temp[:length])
+        labels.append(fake)
+
+    for headline in realSet:
+        temp = [vocab[word] for word in headline] + [0 for i in range(length - len(headline))]
+        variables.append(temp[0:length])
+        labels.append(real)
+
+
+    return Variable(torch.LongTensor(variables)), Variable(torch.LongTensor(labels))
 
