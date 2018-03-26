@@ -31,8 +31,11 @@ val = val.transpose(0,1)
 train_labels = Variable(torch.FloatTensor(train_labels))
 
 model = model.CNN_Text(embedding, 1, embedding_length, 3)
+#model = model.CNN_Text2(embedding)
 model = classifier.train(model, train, train_labels, val, val_labels)
 
 model.training = False
+
+torch.save(model.state_dict(), 'model_state_dict')
 
 print("test set acc: {}".format(classifier.testNN(model, test, test_labels)))

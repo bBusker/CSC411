@@ -1,6 +1,7 @@
 import random
 from math import *
 import os
+import pickle
 
 from torch.autograd import Variable
 from torchtext import data
@@ -17,7 +18,7 @@ def train(model, train_vars, train_labels, val_vars, test_labels):
 
     loss_fn = torch.nn.BCELoss()
     learning_rate = 1e-3
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.012)
 
     for t in range(iterations):
         prediction = model(train_vars)
@@ -29,13 +30,16 @@ def train(model, train_vars, train_labels, val_vars, test_labels):
                             # make a step
         if t % 10 == 0:
             print("iter: {} --------".format(t))
-            print("  loss: {:.4f}".format(loss.data[0]))
-            print("  acc: {:.4f}".format(testNN(model, val_vars, test_labels)))
-        
+        #     print("  loss: {:.4f}".format(loss.data[0]))
+        #     print("  acc: {:.4f}".format(testNN(model, val_vars, test_labels)))
+
     return model
 
 def testNN(model, test_variables, test_labels):
+    prev = model.training
+    model.training=False
     prediction = model(test_variables).data.numpy()
+    model.training=prev
     return np.mean(np.round(prediction, 0).flatten() == np.asarray(test_labels))
 
 
@@ -72,7 +76,7 @@ def prep_data(fake_headlines, real_headlines, embedding_length):
     # random.shuffle(examples)
 
     sentence.build_vocab(data.Dataset(examples, fields),
-                         min_freq=5,
+                         min_freq=3,
                          vectors="glove.6B.100d"
     )
 
@@ -102,5 +106,11 @@ def prep_data(fake_headlines, real_headlines, embedding_length):
     train = sentence.process(train, -1, True)
     val = sentence.process(val, -1, False)
     test = sentence.process(test, -1, False)
+
+    with open('embedding_layer.pkl', 'wb') as f:
+        pickle.dump(embedding, f, pickle.HIGHEST_PROTOCOL)
+
+    with open('vocabstoi.pkl', 'wb') as f:
+        pickle.dump(vocab.stoi, f, pickle.HIGHEST_PROTOCOL)
 
     return train, val, test, train_labels, val_labels, test_labels, embedding, vocab.stoi

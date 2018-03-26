@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-class CNN_Text(nn.Module):
+class CNN_Text(nn.Module): #~85% use weight_decay = 0.012
     
     def __init__(self, embedding, output_channels, embedding_length, kernel_width):
         super(CNN_Text, self).__init__()
@@ -20,8 +20,8 @@ class CNN_Text(nn.Module):
         self.max4 = nn.MaxPool1d(14)
         self.max5 = nn.MaxPool1d(13)
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(p=0.5)
-        self.linear1 = nn.Linear(5, 1)
+        self.dropout = nn.Dropout(p=0.3)
+        self.linear1 = nn.Linear(75, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -38,12 +38,49 @@ class CNN_Text(nn.Module):
         x3 = x3.squeeze(1)
         x4 = x4.squeeze(1)
         x5 = x5.squeeze(1)
-        x1 = self.max1(x1)
-        x2 = self.max2(x2)
-        x3 = self.max3(x3)
-        x4 = self.max4(x4)
-        x5 = self.max5(x5)
+        # x1 = self.max1(x1)
+        # x2 = self.max2(x2)
+        # x3 = self.max3(x3)
+        # x4 = self.max4(x4)
+        # x5 = self.max5(x5)
         x = torch.cat((x1,x2,x3,x4,x5), 2)
+        x = x.squeeze(1)
+        x = self.dropout(x)
+        x = self.relu(x)
+        x = self.linear1(x)
+        x = self.sigmoid(x)
+        x = x.squeeze(1)
+        return x
+
+class CNN_Text2(nn.Module): #~83%
+
+    def __init__(self, embedding):
+        super(CNN_Text2, self).__init__()
+
+        self.embedding = embedding
+        self.conv1 = nn.Conv2d(1, 1, kernel_size=(21, 1), stride=(5,1), padding=(0, 0))
+        self.conv3 = nn.Conv2d(1, 1, kernel_size=(21, 3), stride=(5,1), padding=(0, 1))
+        self.conv5 = nn.Conv2d(1, 1, kernel_size=(21, 5), stride=(5,1), padding=(0, 2))
+        self.max1 = nn.MaxPool2d((16, 1))
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(p=0.3)
+        self.linear1 = nn.Linear(34, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.embedding(x)
+        x = x.unsqueeze(1)
+        x = x.permute(0,1,3,2)
+        #x1 = self.conv1(x)
+        x3 = self.conv3(x)
+        x5 = self.conv5(x)
+        #x1 = x1.squeeze(1)
+        x3 = x3.squeeze(1)
+        x5 = x5.squeeze(1)
+        #x1 = self.max1(x1)
+        x3 = self.max1(x3)
+        x5 = self.max1(x5)
+        x = torch.cat((x3,x5), 2)
         x = x.squeeze(1)
         x = self.dropout(x)
         x = self.relu(x)
