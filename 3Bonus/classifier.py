@@ -12,13 +12,13 @@ import data_processor
 import model
 
 def train(model, train_vars, train_labels, val_vars, test_labels):
-    iterations = 1000
+    iterations = 400
 
     model.training=True
 
     loss_fn = torch.nn.BCELoss()
     learning_rate = 1e-3
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.012)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.00012)
 
     for t in range(iterations):
         prediction = model(train_vars)
@@ -30,8 +30,8 @@ def train(model, train_vars, train_labels, val_vars, test_labels):
                             # make a step
         if t % 10 == 0:
             print("iter: {} --------".format(t))
-        #     print("  loss: {:.4f}".format(loss.data[0]))
-        #     print("  acc: {:.4f}".format(testNN(model, val_vars, test_labels)))
+            print("  loss: {:.4f}".format(loss.data[0]))
+            print("  acc: {:.4f}".format(testNN(model, val_vars, test_labels)))
 
     return model
 

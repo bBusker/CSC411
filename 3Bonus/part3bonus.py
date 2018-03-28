@@ -15,12 +15,12 @@ random.seed(0)
 
 embedding_length = 17
 
-# fake, real = data_processor.loadHeadlines()
-f_real = open("Data/clean_real.txt")
-f_fake = open("Data/clean_fake.txt")
-
-real = [str.split(line) for line in f_real]
-fake = [str.split(line) for line in f_fake]
+fake, real = data_processor.loadHeadlines()
+# f_real = open("Data/clean_real.txt")
+# f_fake = open("Data/clean_fake.txt")
+#
+# real = [str.split(line) for line in f_real]
+# fake = [str.split(line) for line in f_fake]
 
 
 train, val, test, train_labels, val_labels, test_labels, embedding, vocab = classifier.prep_data(fake, real, embedding_length)

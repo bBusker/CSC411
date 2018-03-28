@@ -86,8 +86,8 @@ for headline in headlines:
     res = model(res)
 
     if res.data[0] >= 0.5:
-        print(1)
-    else:
         print(0)
+    else:
+        print(1)
 
 print('end')
