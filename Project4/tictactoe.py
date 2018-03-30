@@ -107,12 +107,12 @@ class Policy(nn.Module):
     """
     The Tic-Tac-Toe Policy
     """
-    def __init__(self, input_size=27, hidden_size=256, output_size=9):
+    def __init__(self, input_size=27, hidden_size=512, output_size=9):
         super(Policy, self).__init__()
         self.hiddenlayer = nn.Sequential(
             nn.Linear(input_size, hidden_size),
-            #nn.Dropout(),
-            nn.Tanh(),
+            # nn.Dropout(),
+            nn.ReLU(),
             nn.Linear(hidden_size, output_size),
             nn.Softmax()
         )
@@ -126,8 +126,14 @@ def select_action(policy, state):
     state = torch.from_numpy(state).long().unsqueeze(0)
     state = torch.zeros(3,9).scatter_(0,state,1).view(1,27)
     pr = policy(Variable(state))
-    m = torch.distributions.Categorical(pr)
-    action = m.sample()
+    try:
+        m = torch.distributions.Categorical(pr)
+        action = m.sample()
+    except:
+        print("except")
+        print(pr)
+        print(m)
+        quit()
     log_prob = torch.sum(m.log_prob(action))
     return action.data[0], log_prob
 
@@ -177,7 +183,7 @@ def get_reward(status):
     """Returns a numeric given an environment status."""
     return {
             Environment.STATUS_VALID_MOVE  : 0,
-            Environment.STATUS_INVALID_MOVE: -10,
+            Environment.STATUS_INVALID_MOVE: -50,
             Environment.STATUS_WIN         : 1,
             Environment.STATUS_TIE         : 0,
             Environment.STATUS_LOSE        : -1
@@ -187,7 +193,7 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
     """Train policy gradient."""
     optimizer = optim.Adam(policy.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=10000, gamma=0.9)
+            optimizer, step_size=4500, gamma=0.7)
     running_reward = 0
 
     res_x = []
@@ -266,6 +272,11 @@ def load_weights(policy, episode):
 
 if __name__ == '__main__':
     import sys
+
+    np.random.seed(0)
+    torch.manual_seed(0)
+    random.seed(0)
+
     policy = Policy()
     env = Environment()
 
