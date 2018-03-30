@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.distributions
 from torch.autograd import Variable
+import matplotlib.pyplot as plt
 
 class Environment(object):
     """
@@ -87,6 +88,10 @@ class Environment(object):
     def play_against_random(self, action):
         """Play a move, and then have a random agent play the next move."""
         state, status, done = self.step(action)
+
+        if status == self.STATUS_INVALID_MOVE:
+            print("invalid move")
+
         if not done and self.turn == 2:
             state, s2, done = self.random_step()
             if done:
@@ -102,13 +107,14 @@ class Policy(nn.Module):
     """
     The Tic-Tac-Toe Policy
     """
-    def __init__(self, input_size=27, hidden_size=64, output_size=9):
+    def __init__(self, input_size=27, hidden_size=256, output_size=9):
         super(Policy, self).__init__()
         self.hiddenlayer = nn.Sequential(
             nn.Linear(input_size, hidden_size),
-            nn.Sigmoid(),
+            #nn.Dropout(),
+            nn.Tanh(),
             nn.Linear(hidden_size, output_size),
-            nn.Sigmoid()
+            nn.Softmax()
         )
 
     def forward(self, x):
@@ -171,20 +177,27 @@ def get_reward(status):
     """Returns a numeric given an environment status."""
     return {
             Environment.STATUS_VALID_MOVE  : 0,
-            Environment.STATUS_INVALID_MOVE: -1,
+            Environment.STATUS_INVALID_MOVE: -10,
             Environment.STATUS_WIN         : 1,
             Environment.STATUS_TIE         : 0,
             Environment.STATUS_LOSE        : -1
     }[status]
 
-def train(policy, env, gamma=1.0, log_interval=1000):
+def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
     """Train policy gradient."""
     optimizer = optim.Adam(policy.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(
             optimizer, step_size=10000, gamma=0.9)
     running_reward = 0
 
-    for i_episode in count(1):
+    res_x = []
+    res_y = []
+    wins = 0
+    ties = 0
+    losses = 0
+
+    # for i_episode in count(1):
+    for i_episode in range(max_iters):
         saved_rewards = []
         saved_logprobs = []
         state = env.reset()
@@ -196,16 +209,33 @@ def train(policy, env, gamma=1.0, log_interval=1000):
             saved_logprobs.append(logprob)
             saved_rewards.append(reward)
 
-        R = compute_returns(saved_rewards)[0]
+        R = compute_returns(saved_rewards, gamma)[0]
         running_reward += R
 
         finish_episode(saved_rewards, saved_logprobs, gamma)
+
+        if status == 'win':
+            wins += 1
+        elif status == 'lose':
+            losses += 1
+        else:
+            ties += 1
 
         if i_episode % log_interval == 0:
             print('Episode {}\tAverage return: {:.2f}'.format(
                 i_episode,
                 running_reward / log_interval))
+            print('Win: {} Tie: {} Loss: {}'.format(
+                wins/float(log_interval),
+                ties/float(log_interval),
+                losses/float(log_interval)
+            ))
+            res_x.append(i_episode)
+            res_y.append(running_reward/log_interval)
             running_reward = 0
+            wins = 0
+            losses = 0
+            ties = 0
 
         if i_episode % (log_interval) == 0:
             torch.save(policy.state_dict(),
@@ -215,6 +245,8 @@ def train(policy, env, gamma=1.0, log_interval=1000):
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
+
+    return res_x, res_y
 
 
 def first_move_distr(policy, env):
@@ -239,7 +271,14 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 1:
         # `python tictactoe.py` to train the agent
-        train(policy, env)
+        res_x, res_y = train(policy, env, gamma=0.99, max_iters=1000000)
+
+        plt.plot(res_x[1:], res_y[1:])
+        plt.ylabel("Average Return")
+        plt.xlabel("Episode Number")
+        plt.title("Training Curve for TicTacToe Policy Gradient")
+        plt.axis([0,60000,-6,1])
+        plt.show()
     else:
         # `python tictactoe.py <ep>` to print the first move distribution
         # using weightt checkpoint at episode int(<ep>)
