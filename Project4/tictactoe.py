@@ -126,8 +126,14 @@ def select_action(policy, state):
     state = torch.from_numpy(state).long().unsqueeze(0)
     state = torch.zeros(3,9).scatter_(0,state,1).view(1,27)
     pr = policy(Variable(state))
-    m = torch.distributions.Categorical(pr)
-    action = m.sample()
+    try:
+        m = torch.distributions.Categorical(pr)
+        action = m.sample()
+    except:
+        print("except")
+        print(pr)
+        print(m)
+        quit()
     log_prob = torch.sum(m.log_prob(action))
     return action.data[0], log_prob
 
@@ -187,7 +193,7 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
     """Train policy gradient."""
     optimizer = optim.Adam(policy.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=5000, gamma=0.8)
+            optimizer, step_size=4500, gamma=0.7)
     running_reward = 0
 
     res_x = []
@@ -276,6 +282,10 @@ def load_weights(policy, episode):
 
 if __name__ == '__main__':
     import sys
+    np.random.seed(0)
+    torch.manual_seed(0)
+    random.seed(0)
+
     policy = Policy()
     env = Environment()
 
@@ -287,11 +297,84 @@ if __name__ == '__main__':
         plt.ylabel("Average Return")
         plt.xlabel("Episode Number")
         plt.title("Training Curve for TicTacToe Policy Gradient")
-        plt.axis([0,60000,-6,1])
+        plt.axis([0,70000,-6,1])
         plt.show()
     else:
         # `python tictactoe.py <ep>` to print the first move distribution
         # using weightt checkpoint at episode int(<ep>)
         ep = int(sys.argv[1])
         load_weights(policy, ep)
+        print("-----------First Move-----------")
         print(first_move_distr(policy, env))
+        print("-----------100 games------------")
+        win, loss, tie = 0,0,0
+        for i in range(100):
+            state = env.reset()
+            done = False
+            while not done:
+                action, logprob = select_action(policy, state)
+                state, status, done = env.play_against_random(action)
+                if done:
+                    if status == "win":
+                        win += 1
+                    elif status == "loss":
+                        loss += 1
+                    else:
+                        tie += 1
+        print("Of 100 games: {} Wins {} Losses {} Ties".format(win, loss, tie))
+        print("----------Display 5 games----------")
+        print("Move | State")
+        for i in range(5):
+            state = env.reset()
+            done = False
+            moves = ""
+            while not done:
+                action, logprob = select_action(policy, state)
+                state, status, done = env.play_against_random(action)
+                print(str(action) + " | " + str(state))
+                if done:
+                    print("-----" + status + "-----")
+        print("-----------Winrates of all episodes-----------")
+        wins, losses, ties = [],[],[]
+        x = []
+        for j in range(0,70000, 1000):
+            load_weights(policy, j)
+            win, loss, tie = 0,0,0
+            for i in range(100):
+                state = env.reset()
+                done = False
+                while not done:
+                    action, logprob = select_action(policy, state)
+                    state, status, done = env.play_against_random(action)
+                    if done:
+                        if status == "win":
+                            win += 1
+                        elif status == "loss":
+                            loss += 1
+                        else:
+                            tie += 1
+            # print("{}: Of 100 games: {} Wins {} Losses {} Ties".format(j, win, loss, tie))
+            wins.append(win)
+            losses.append(loss)
+            ties.append(tie)
+            x.append(j)
+        x = np.array(x)
+        plt.plot(x, np.array(wins),label='Wins')
+        plt.plot(x, np.array(losses),label="Losses")
+        plt.plot(x, np.array(ties), label="Ties")
+        plt.ylabel("W/L/T of 100")
+        plt.xlabel("Episode Number")
+        plt.legend(loc="best")
+        plt.title("Win/Loss/Tie per Episode")
+        plt.show()
+        print("----------First move as a fn of training----------")
+        highestFirstMove = []
+        for j in range(0, 70000, 1000):
+            load_weights(policy, j)
+            highestFirstMove.append(np.argmax(first_move_distr(policy, env)))
+        plt.plot(x, np.array(highestFirstMove), label = "Cell")
+        plt.ylabel("Cell selected")
+        plt.xlabel("Episode Number")
+        plt.legend(loc="best")
+        plt.title("Cell selected per Episode")
+        plt.show()
