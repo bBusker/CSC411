@@ -89,8 +89,8 @@ class Environment(object):
         """Play a move, and then have a random agent play the next move."""
         state, status, done = self.step(action)
 
-        if status == self.STATUS_INVALID_MOVE:
-            print("invalid move")
+        # if status == self.STATUS_INVALID_MOVE:
+        #     print("invalid move")
 
         if not done and self.turn == 2:
             state, s2, done = self.random_step()
@@ -107,14 +107,14 @@ class Policy(nn.Module):
     """
     The Tic-Tac-Toe Policy
     """
-    def __init__(self, input_size=27, hidden_size=256, output_size=9):
+    def __init__(self, input_size=27, hidden_size=512, output_size=9):
         super(Policy, self).__init__()
         self.hiddenlayer = nn.Sequential(
             nn.Linear(input_size, hidden_size),
             #nn.Dropout(),
-            nn.Tanh(),
+            nn.ReLU(),
             nn.Linear(hidden_size, output_size),
-            nn.Softmax()
+            nn.Softmax(dim=-1)
         )
 
     def forward(self, x):
@@ -164,8 +164,8 @@ def finish_episode(saved_rewards, saved_logprobs, gamma=1.0):
     returns = compute_returns(saved_rewards, gamma)
     returns = torch.Tensor(returns)
     # subtract mean and std for faster training
-    returns = (returns - returns.mean()) / (returns.std() +
-                                            np.finfo(np.float32).eps)
+    # returns = (returns - returns.mean()) / (returns.std() +
+    #                                         np.finfo(np.float32).eps)
     for log_prob, reward in zip(saved_logprobs, returns):
         policy_loss.append(-log_prob * reward)
     policy_loss = torch.cat(policy_loss).sum()
@@ -187,7 +187,7 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
     """Train policy gradient."""
     optimizer = optim.Adam(policy.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=10000, gamma=0.9)
+            optimizer, step_size=5000, gamma=0.8)
     running_reward = 0
 
     res_x = []
@@ -195,6 +195,8 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
     wins = 0
     ties = 0
     losses = 0
+    invalids = 0
+    moves = 0
 
     # for i_episode in count(1):
     for i_episode in range(max_iters):
@@ -208,12 +210,17 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
             reward = get_reward(status)
             saved_logprobs.append(logprob)
             saved_rewards.append(reward)
+            # Testing Code
+            if status == 'inv':
+                invalids += 1
+            moves += 1
 
         R = compute_returns(saved_rewards, gamma)[0]
         running_reward += R
 
         finish_episode(saved_rewards, saved_logprobs, gamma)
 
+        # Testing Code
         if status == 'win':
             wins += 1
         elif status == 'lose':
@@ -225,10 +232,11 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
             print('Episode {}\tAverage return: {:.2f}'.format(
                 i_episode,
                 running_reward / log_interval))
-            print('Win: {} Tie: {} Loss: {}'.format(
+            print('--Win: {} Tie: {} Loss: {} InvMove: {:.3f}'.format(
                 wins/float(log_interval),
                 ties/float(log_interval),
-                losses/float(log_interval)
+                losses/float(log_interval),
+                invalids/float(moves)
             ))
             res_x.append(i_episode)
             res_y.append(running_reward/log_interval)
@@ -236,6 +244,8 @@ def train(policy, env, gamma=1.0, log_interval=1000, max_iters=50000):
             wins = 0
             losses = 0
             ties = 0
+            invalids = 0
+            moves = 0
 
         if i_episode % (log_interval) == 0:
             torch.save(policy.state_dict(),
